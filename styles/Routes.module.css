@@ -1,0 +1,60 @@
+/* Routes.module.css */
+
+.routesContainer {
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+  }
+  
+  .routeSection {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  }
+  
+  .binsList {
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .binItem {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+  
+  .startRouteButton {
+    padding: 5px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.2s;
+  }
+  
+  .startRouteButton:hover {
+    background-color: #45a049;
+  }
+  
+  .startRouteButton:disabled {
+    background-color: #ccc;
+    cursor: default;
+  }
+
+  .filtersContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .filtersContainer label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }

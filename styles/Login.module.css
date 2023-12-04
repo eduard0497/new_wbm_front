@@ -1,0 +1,57 @@
+.login_container {
+	margin-top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 50px;
+	max-width: 400px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	border: 1px solid #084596; /* Darker border for dark mode */
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Darker shadow for depth */
+	background-color: #03224b;  /* Darker background for the container */
+  }
+  
+  .login_container > input {
+	width: 100%;
+	margin: 0;
+	padding: 15px;
+	border: 1px solid #333;
+	border-radius: 4px;
+	font-size: 1rem;
+	color: #000000; /* White text for elements */
+	background-color: #a7c7f0; 
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Adjusted shadow for depth */
+  }
+  
+  .login_container > h1 {
+	text-align: center;
+	color: #ffffff; /* Light text for header to match dark mode */
+	font-size: 2rem;
+	margin-bottom: 0.5em;
+  }
+  
+  .buttons_in_row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+  }
+  
+  /* Updated button styling for dark mode */
+  .button {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 4px;
+	background-color: #1a73e8; /* Company primary color for buttons */
+	color: #ffffff;
+	font-weight: bold;
+	cursor: pointer;
+	transition: background-color 0.3s;
+  }
+  
+  .button:hover {
+	background-color: #1664c1;
+  }
+  

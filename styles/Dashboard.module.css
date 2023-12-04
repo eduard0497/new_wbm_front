@@ -1,0 +1,272 @@
+
+
+.dashboard_container {
+  display: flex;
+  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjust min and max as necessary */
+  gap: 20px;
+  justify-content: center;
+}
+
+.nav_container {
+  width: 150px; /* Fixed sidebar width */
+  height: 100vh;
+  background-color: #021329; 
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align items to the start (left) */
+  position: fixed; /* Fixed position to stay in view */
+  top: 0;
+  left: 0;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.nav_container button {
+  width: 100%;
+  padding: 10px;
+  color: #fff; /* White text for buttons */
+  background: #021329;  /* Bright color for buttons */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.nav_container button:hover {
+  background: rgb(0, 8, 17);  /* Darker background on hover */
+}
+
+
+.nav_container .logout_button {
+  background: #ff4136;
+  margin-top: auto;
+}
+
+.nav_container .logout_button:hover {
+  background: #e82c20; /* A darker shade of red for hover */
+}
+
+
+
+
+
+/* Sidebar Styling */
+.sidebar {
+  width: 220px; /* Width of the sidebar */
+  position: fixed; /* Fixed position to stay in view */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background-color: #232629;  /* Dark background to match navbar */
+  color: #c2c0c0; /* White text color */
+  padding: 20px;
+  overflow-y: auto; /* Allows scrolling of the sidebar content */
+  z-index: 1000; /* Ensure the sidebar is above other content */
+  top: calc(55px); /* 60px is navbar height and 1rem could be the vertical padding of the navbar */
+}
+
+/* Styling for individual panels in the sidebar */
+.sidebar-panel {
+  background-color: #343a40; /* Dark background for contrast */
+  color: #ffffff; /* Light text for readability */
+  margin-bottom: 20px; /* Space between panels */
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+}
+
+.sidebar-panel h5 {
+  color: #f1f1f1;
+  margin-bottom: 15px;
+  font-weight: 500; /* Semi-bold for headers */
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #2c3e50;
+  border-radius: 10px;
+}
+
+/* Styling for the items in the panels */
+.sidebar_panel_item {
+  background-color: #4CAF50; /* Even lighter for contrast */
+  color: black;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.sidebar_panel_item:hover {
+  background-color: #4CAF50;  /* Highlight item on hover */
+
+}
+
+.stats_item {
+  background-color: rgb(63, 63, 63);  /* Even lighter for contrast */
+  color: rgb(255, 255, 255);
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.alerts_item {
+  background-color: #232629; /* Even lighter for contrast */
+  color: rgb(255, 255, 255);
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+  display: block;
+}
+
+.feed_item {
+  background-color:rgb(63, 63, 63);/* Even lighter for contrast */
+  color: rgb(255, 255, 255);
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+  display: block;
+}
+
+.cardContainer {
+  margin-top: 80px; /* Adjust based on the height of your fixed navbar */
+  display:block;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  justify-content: center;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px; /* Adjust height as needed */
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+  background-color: rgb(223, 247, 223);
+}
+
+.card i {
+  font-size: 2rem;
+  color: #4CAF50; /* Example icon color, adjust as needed */
+}
+
+.card h3 {
+  margin-top: 10px;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+
+.backButton {
+  display: block; /* Or 'inline-block' if you prefer */
+  margin: 20px auto; /* Center the button in the container */
+  padding: 10px 20px;
+  background-color: #007bff; /* Bootstrap primary color, change as needed */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.backButton:hover {
+  background-color: #0056b3; /* Darker shade for hover state */
+}
+
+.hidden {
+  display: none;
+}
+
+.alert_item {
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.alert_full {
+  border-left: 5px solid red;  /* Bootstrap's `danger` color for full bins */
+  background-color:rgb(63, 63, 63);
+  color:white;
+}
+
+.alert_low {
+  border-left: 5px solid yellow; /* Bootstrap's `warning` color for low battery */
+  color: white;
+  background-color:rgb(63, 63, 63);
+}
+
+.alert_combined {
+  border-left: 5px solid orange;/* Bootstrap's `info` color for full bin + low battery */
+  color: white;
+  background-color:rgb(63, 63, 63);
+}
+
+/* dashboard.module.css */
+.dashboardContainer {
+  margin-top: 80px;
+  margin-left: 220px; /* Sidebar width */
+  margin-right: auto;
+  
+  max-width: calc(100% - 240px); /* Adjust based on sidebar width and desired padding */
+  padding: 20px;
+  transition: margin-left 0.3s;
+  /* Other styles... */
+}
+
+
+@media (max-width: 1316px) { /* Adjust breakpoint as necessary */
+  .dashboardContainer {
+    margin-left: 20px; /* Give some space from the sidebar if it's collapsed or hidden */
+    margin-right: 20px; /* Give some space from the right edge of the window */
+    max-width: 100%; /* Allow the container to be full width */
+  }
+  
+  .dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjust for fewer columns on smaller screens */
+  }
+  .sidebar {
+    display: none;
+
+  }
+
+  .sidebar-panel {
+    border-radius: 0; /* Remove border radius for full-width panels */
+  }
+}
+
+/* You may add more breakpoints for finer control */
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Even fewer columns on small screens */
+  }
+}
+
+

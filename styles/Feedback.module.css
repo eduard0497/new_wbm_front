@@ -1,0 +1,110 @@
+/* Feedback.module.css */
+
+.feedback_container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #e9ebee; /* Soft background color */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  color: #333; /* Dark gray color for better readability */
+}
+
+.feedback_container h1 {
+  font-size: 2rem; /* Larger font size for the heading */
+  font-weight: 500; /* Medium font weight for the heading */
+  color: #333; /* Dark color for the heading */
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.feedback_container select,
+.feedback_container input[type="text"],
+.feedback_container textarea {
+  width: 100%; /* Full width elements */
+  padding: 10px; /* Padding for input fields */
+  margin-bottom: 15px; /* Margin to separate the fields */
+  border: 1px solid #ccc; /* Subtle border */
+  border-radius: 4px; /* Rounded borders */
+  box-sizing: border-box; /* Box-sizing to include padding in width */
+}
+
+.feedback_container input{
+  background-color: #d8dce2;
+}
+
+.feedback_container textarea {
+  resize: vertical; /* Allows vertical resizing of the textarea */
+}
+
+.feedback_container button {
+  padding: 10px 15px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4CAF50;  /* Button color */
+  color: #fff; /* Button text color */
+  cursor: pointer; /* Cursor for button hover */
+  transition: background-color 0.3s; /* Transition for hover effect */
+}
+
+.feedback_container button:hover {
+  background-color: #45a049; 
+}
+
+
+
+
+
+.feedback_table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.feedback_table th,
+.feedback_table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.feedback_table th {
+  background-color: #f4f4f4;
+  cursor: pointer;
+}
+
+.feedback_table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Style for sortable columns indicating sort direction */
+.sortable_column::after {
+  content: '';
+  float: right;
+  margin-left: 5px;
+  border-width: 0 4px 4px;
+  border-style: solid;
+  border-color: #ffcc00 transparent transparent transparent;
+}
+
+/* Style for sortable columns when sorted in descending order */
+.sortable_column.descending::after {
+  border-width: 4px 4px 0;
+  border-color: transparent transparent #ffcc00 transparent;
+}
+
+.feedback_form_container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #e9ebee;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.feedback_table_container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+}

@@ -1,16 +1,110 @@
-html,
-body {
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+
+/* Global settings */
+* {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-* {
   box-sizing: border-box;
+  font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 }
+
+
+body {
+  background-color: #ffffff; 
+  color: #ffffff;
+  padding-top: 56px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff; 
+  margin-bottom: 0.5em;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem; 
+  font-weight: 400; 
+}
+
+p {
+  color: #ffffff; 
+  line-height: 1.6; 
+}
+
+/* Buttons and Form Elements */
+button,select, textarea {
+  padding: 10px 15px; 
+  border: 1px solid #333333; 
+  border-radius: 4px;
+  font-size: 1rem; 
+  color: #ffffff; 
+  background-color: #5792df; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease; 
+}
+
+input,select,textarea{
+  background-color: #d8dce2;
+  color:black;
+}
+
+button:hover, button:focus, input:focus, select:focus, textarea:focus {
+  border-color: #1a73e8; 
+  outline: none; 
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.3);
+}
+
+/* Buttons */
+button {
+  background-color: #1a73e8; 
+  color: #ffffff; 
+
+
+}
+
+button:hover {
+  background-color: #1664c1;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center; 
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  /* Adjustments for tablets and smaller desktops */
+  .container, .nav_container, .map_container, .list_container {
+    padding: 15px; /* Smaller padding */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Adjustments for mobile devices */
+  .container, .nav_container {
+    padding: 10px; /* Even smaller padding */
+  }
+  .nav_container {
+    width: 200px; /* Narrower sidebar */
+  }
+  .map_container, .list_container {
+    margin-left: 200px; /* Adjust margin to match the new sidebar width */
+  }
+}
+
+/* You may also want to consider a collapsible sidebar for very small screens */
+@media (max-width: 480px) {
+  .nav_container {
+    width: 100%; /* Full width sidebar */
+    height: auto; /* Auto height */
+    position: relative; /* Relative positioning */
+    padding: 5px; /* Minimal padding */
+  }
+  .map_container, .list_container {
+    margin-left: 0; /* Remove margin as the sidebar is now full width */
+  }
+}
+
+
