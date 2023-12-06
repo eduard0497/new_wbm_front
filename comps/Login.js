@@ -41,8 +41,8 @@ function Login() {
   };
 
   return (
-    <div className="container my-5">
-      <div className="card mx-auto" style={{ maxWidth: '400px' }}>
+    <div className="container my-5" >
+      <div className="card mx-auto" style={{ maxWidth: '600px' }}>
         <div className="card-body">
           <h1 className="card-title text-center mb-4">Waste Bin Management</h1>
           <h2 className="h4 card-subtitle text-center mb-4">Login</h2>
