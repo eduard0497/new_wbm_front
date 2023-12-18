@@ -2,58 +2,59 @@ import React, { useState } from "react";
 import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";
 
-const defaultCredsForAdmins = {
-  username: "1234",
-  password: "1234",
-};
-const defaultCredsForEmployees = {
-  username: "qwerty",
-  password: "qwerty",
-};
-
 function Login() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const login = () => {
-    if (!username || !password) {
+    if (!email || !password) {
       setErrorMessage("Fields are empty...");
       return;
-    } else if (
-      username == defaultCredsForAdmins.username &&
-      password == defaultCredsForAdmins.password
-    ) {
-      router.push("/admin-dashboard");
-    } else if (
-      username == defaultCredsForEmployees.username &&
-      password == defaultCredsForEmployees.password
-    ) {
-      router.push("/employee-dashboard");
     }
+
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/login`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (!data.status) {
+          setErrorMessage(data.msg);
+        } else {
+          await router.push("/admin-dashboard");
+        }
+      });
   };
 
   const clearInputs = () => {
-    setUsername('');
-    setPassword('');
-    setErrorMessage('');
+    setEmail("");
+    setPassword("");
+    setErrorMessage("");
   };
 
   return (
-    <div className="container my-5" >
-      <div className="card mx-auto" style={{ maxWidth: '600px' }}>
+    <div className="container my-5">
+      <div className="card mx-auto" style={{ maxWidth: "600px" }}>
         <div className="card-body">
           <h1 className="card-title text-center mb-4">Waste Bin Management</h1>
           <h2 className="h4 card-subtitle text-center mb-4">Login</h2>
-          {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+          {errorMessage && (
+            <div className="alert alert-danger">{errorMessage}</div>
+          )}
           <div className="mb-3">
             <input
               type="text"
               className="form-control"
-              placeholder="Username..."
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Email..."
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="mb-3">

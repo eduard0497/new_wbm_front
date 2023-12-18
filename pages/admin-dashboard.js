@@ -6,16 +6,38 @@ import ManageEmployees from "../comps/ManageEmployees";
 import Data from "../comps/Data.js";
 import Routes from "../comps/Routes";
 import { devices } from "../aaa_samples/devices";
-import { employees } from "../aaa_samples/employees";
 import { feedbacks } from "../aaa_samples/feedbacks";
 import styles from "../styles/Dashboard.module.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 function AdminDashboard() {
+  const [currentUser, setcurrentUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setLoading(true);
     // Dynamically import the Bootstrap JS
     import("bootstrap/dist/js/bootstrap.bundle.min.js");
+
+    const getUserInfo = () => {
+      fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_LINK}/verify-user-upon-entering`,
+        {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setcurrentUser(data.userInfo);
+        })
+        .catch((e) => setError(e));
+    };
+
+    getUserInfo();
+    setLoading(false);
   }, []);
+
   const router = useRouter();
   const [currentScreen, setCurrentScreen] = useState("");
   const [cardContainerStyle, setCardContainerStyle] = useState({
@@ -83,17 +105,19 @@ function AdminDashboard() {
   };
 
   // Dashboard cards
-  const DashboardCards = () => (
+  const DashboardCards = ({ role }) => (
     <div className={styles.dashboard}>
       {/* Card for Data */}
-      <div className={styles.card} onClick={() => setCurrentScreen("data")}>
-        <i className="bi bi-bar-chart-fill"></i>
-        <h3>Data</h3>
-      </div>
+      {role === "admin" ? (
+        <div className={styles.card} onClick={() => setCurrentScreen("data")}>
+          <i className="bi bi-bar-chart-fill"></i>
+          <h3>Data</h3>
+        </div>
+      ) : null}
 
       {/* Card for MapView */}
       <div className={styles.card} onClick={() => setCurrentScreen("mapView")}>
-        <i class="bi bi-trash"></i>
+        <i className="bi bi-trash"></i>
         <h3>Bins</h3>
       </div>
 
@@ -104,13 +128,15 @@ function AdminDashboard() {
       </div>
 
       {/* Card for Employees */}
-      <div
-        className={styles.card}
-        onClick={() => setCurrentScreen("employees")}
-      >
-        <i className="bi bi-people-fill"></i>
-        <h3>Employees</h3>
-      </div>
+      {role === "admin" ? (
+        <div
+          className={styles.card}
+          onClick={() => setCurrentScreen("employees")}
+        >
+          <i className="bi bi-people-fill"></i>
+          <h3>Employees</h3>
+        </div>
+      ) : null}
 
       {/* Card for Feedback */}
       <div className={styles.card} onClick={() => setCurrentScreen("feedback")}>
@@ -186,6 +212,23 @@ function AdminDashboard() {
     })
     .filter((alert) => alert !== null); // Filter out the null entries
 
+  const logout = async () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/logout`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        console.log(data.msg);
+        await router.push("/");
+      });
+  };
+
+  if (loading || !currentUser) {
+    return <h1>LOADING...</h1>;
+  }
+
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -216,12 +259,14 @@ function AdminDashboard() {
               <button className="nav-link" onClick={() => setCurrentScreen("")}>
                 <i className="bi bi-house"></i> Home
               </button>
-              <button
-                className="nav-link"
-                onClick={() => setCurrentScreen("data")}
-              >
-                <i className="bi bi-bar-chart-fill"></i> Data
-              </button>
+              {currentUser.role === "admin" ? (
+                <button
+                  className="nav-link"
+                  onClick={() => setCurrentScreen("data")}
+                >
+                  <i className="bi bi-bar-chart-fill"></i> Data
+                </button>
+              ) : null}
               <button
                 className="nav-link"
                 aria-current="page"
@@ -236,19 +281,21 @@ function AdminDashboard() {
               >
                 <i className="bi bi-map"></i> Routes
               </button>
-              <button
-                className="nav-link"
-                onClick={() => setCurrentScreen("employees")}
-              >
-                <i className="bi bi-people-fill"></i> Employees
-              </button>
+              {currentUser.role === "admin" ? (
+                <button
+                  className="nav-link"
+                  onClick={() => setCurrentScreen("employees")}
+                >
+                  <i className="bi bi-people-fill"></i> Employees
+                </button>
+              ) : null}
               <button
                 className="nav-link"
                 onClick={() => setCurrentScreen("feedback")}
               >
                 <i className="bi bi-envelope-fill"></i> Feedback
               </button>
-              <button className="nav-link" onClick={() => router.push("/")}>
+              <button className="nav-link" onClick={logout}>
                 <i className="bi bi-box-arrow-right"></i> Log Out
               </button>
             </div>
@@ -280,7 +327,7 @@ function AdminDashboard() {
 
       <div className={`container ${styles.dashboardContainer}`}>
         <div className={styles.cardContainer} style={cardContainerStyle}>
-          <DashboardCards />
+          <DashboardCards role={currentUser.role} />
           {/* ... */}
         </div>
 

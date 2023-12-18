@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/ManageEmployees.module.css";
-import { employees } from "../aaa_samples/employees";
 
 function ManageEmployees() {
   const [employees, setEmployees] = useState([]);
@@ -11,12 +10,32 @@ function ManageEmployees() {
   const [sortedEmployees, setSortedEmployees] = useState(employees);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
+  const [showAddEmployee, setshowAddEmployee] = useState(false);
+
+  const getAllEmployees = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-employees`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((info) => {
+        setEmployees(info);
+        setSortedEmployees(info);
+      })
+      .catch((e) => setError(e));
+  };
+
   // Load employees data
   useEffect(() => {
     setIsLoading(true);
 
     const useFetchEmployees = () => {
-      fetch("http://localhost:3000/get-employees")
+      fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-employees`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      })
         .then((res) => res.json())
         .then((info) => {
           setEmployees(info);
@@ -29,7 +48,6 @@ function ManageEmployees() {
     setIsLoading(false);
   }, []);
 
-  // Function to handle sorting
   const sortData = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -64,15 +82,7 @@ function ManageEmployees() {
     setSortConfig({ key, direction });
   };
 
-  // Function to handle the Add Employee button click
-  const handleAddEmployee = () => {
-    //Logic for add employee
-    console.log("Add Employee button clicked");
-  };
-
-  // Function to handle the View Logs button/link click
   const handleViewLogs = () => {
-    //logic for view logs
     console.log("View Logs clicked");
   };
 
@@ -87,12 +97,18 @@ function ManageEmployees() {
   return (
     <div className={styles.manage_employees_container}>
       <h1>Manage Employees</h1>
-      <button className={styles.button} onClick={handleAddEmployee}>
+      <button
+        className={styles.button}
+        onClick={() => setshowAddEmployee(!showAddEmployee)}
+      >
         Add Employee
       </button>
       <button className={styles.button} onClick={handleViewLogs}>
         View Logs
       </button>
+      {showAddEmployee && (
+        <AddEmployeeModal getAllEmployees={getAllEmployees} />
+      )}
       <table className={styles.employees_table}>
         <thead>
           <tr>
@@ -101,7 +117,6 @@ function ManageEmployees() {
             <th onClick={() => sortData("email")}>Email</th>
             <th onClick={() => sortData("role")}>Role</th>
             <th onClick={() => sortData("start_date")}>Employee Since</th>
-            {/* Add other headers here */}
           </tr>
         </thead>
         <tbody>
@@ -111,7 +126,7 @@ function ManageEmployees() {
               <td>{`${employee.fname} ${employee.lname}`}</td>
               <td>{employee.email}</td>
               <td>{employee.role}</td>
-              <td>{ new Date(employee.start_date).toLocaleDateString() }</td>
+              <td>{new Date(employee.start_date).toLocaleDateString()}</td>
             </tr>
           ))}
         </tbody>
@@ -119,5 +134,149 @@ function ManageEmployees() {
     </div>
   );
 }
+
+const AddEmployeeModal = ({ getAllEmployees }) => {
+  const [fname, setfname] = useState("");
+  const [lname, setlname] = useState("");
+  const [email, setemail] = useState("");
+  const [password, setpassword] = useState("");
+  const [start_date, setstart_date] = useState("");
+  const [keyToAddAdmin, setkeyToAddAdmin] = useState("");
+
+  const clearInputs = () => {
+    setfname("");
+    setlname("");
+    setemail("");
+    setpassword("");
+    setstart_date("");
+    setkeyToAddAdmin("");
+  };
+
+  const addAdmin = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/register_admin`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fname,
+        lname,
+        email,
+        password,
+        start_date,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          clearInputs();
+          getAllEmployees();
+          console.log(data.msg);
+        }
+      });
+  };
+
+  const addEmployee = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/register_employee`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fname,
+        lname,
+        email,
+        password,
+        start_date,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          clearInputs();
+          getAllEmployees();
+          console.log(data.msg);
+        }
+      });
+  };
+
+  return (
+    <div className="container my-5">
+      <div className="card mx-auto">
+        <div className="card-body">
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="First Name"
+              value={fname}
+              onChange={(e) => setfname(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Last Name"
+              value={lname}
+              onChange={(e) => setlname(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setemail(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setpassword(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="KEY"
+              value={keyToAddAdmin}
+              onChange={(e) => setkeyToAddAdmin(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Start Date"
+              value={start_date}
+              onChange={(e) => setstart_date(e.target.value)}
+            />
+          </div>
+
+          <div className="d-flex justify-content-between">
+            <button className="btn btn-outline-secondary" onClick={clearInputs}>
+              Clear
+            </button>
+            {keyToAddAdmin === process.env.NEXT_PUBLIC_KEY_TO_ADD_ADMIN ? (
+              <button className="btn btn-primary" onClick={addAdmin}>
+                Add ADMIN
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={addEmployee}>
+                Add
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default ManageEmployees;
