@@ -180,6 +180,7 @@ const AddEmployeeModal = ({ getAllEmployees }) => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/register_employee`, {
       method: "post",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({
         fname,
         lname,

@@ -9,32 +9,42 @@ import styles from "../styles/MapView.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBatteryQuarter, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-// Example data import - to be replaced by API call later
-import { devices as exampleDevices } from "../aaa_samples/devices";
-
 function MapView({ isAdmin }) {
-  // Custom hook for fetching device data
-  const useFetchDevices = () => {
-    // Replace with API call logic later
-    return exampleDevices;
-  };
+  const [showRegisterNewBinModal, setshowRegisterNewBinModal] = useState(false);
 
   // State for devices and loading/error handling
   const [devices, setDevices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const getAllDevices = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.status) {
+          setError(data.msg);
+        } else {
+          setDevices(data.devices);
+        }
+      })
+      .catch((e) => setError(e));
+  };
+
   // Load devices data
   useEffect(() => {
     setIsLoading(true);
     try {
-      const fetchedDevices = useFetchDevices();
-      setDevices(fetchedDevices);
+      getAllDevices();
     } catch (e) {
       setError(e);
     }
     setIsLoading(false);
   }, []);
+
 
   // Other existing state variables
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -94,7 +104,6 @@ function MapView({ isAdmin }) {
     }
     return icons;
   };
-
   // or list: Updated function to determine the class based on device's level and battery
   const getListItemClass = (level, battery) => {
     if (level >= 80 && battery <= 25) {
@@ -165,6 +174,7 @@ function MapView({ isAdmin }) {
             <th>Alerts</th>
             <th>Level</th>
             <th>Battery</th>
+            <th>Last Checked</th>
             <th>Controls</th>
           </tr>
         </thead>
@@ -175,7 +185,7 @@ function MapView({ isAdmin }) {
               key={device.id}
               className={`${getListItemClass(device.level, device.battery)}`}
             >
-              <td>{device.id}</td>
+              <td>{device.unique_id}</td>
               <td>
                 <div className={styles.list_item_icons}>
                   {renderStatusIcons(device.level, device.battery)}
@@ -183,6 +193,7 @@ function MapView({ isAdmin }) {
               </td>
               <td>{device.level}%</td>
               <td>{device.battery}%</td>
+              <td>{device.last_updated}</td>
               <td className={styles.devices_table_control_buttons}>
                 <button className={styles.submenu_button}>
                   Submit Feedback
@@ -206,12 +217,21 @@ function MapView({ isAdmin }) {
   if (error) {
     return <p>Error loading data</p>;
   }
+
   return (
     <div className={styles.map_container}>
       {/* Conditionally render the register button if isAdmin is true */}
       {isAdmin && (
         <div className={styles.register_button_container}>
-          <button className={styles.active}>Register New Bin</button>
+          <button
+            className={styles.active}
+            onClick={() => setshowRegisterNewBinModal(!showRegisterNewBinModal)}
+          >
+            Register New Bin
+          </button>
+          {showRegisterNewBinModal && (
+            <RegisterNewBinModal setDevices={setDevices} />
+          )}
         </div>
       )}
       <div className={styles.view_toggle}>
@@ -244,13 +264,19 @@ function MapView({ isAdmin }) {
               return (
                 <React.Fragment key={device.id}>
                   <MarkerF
-                    position={{ lat: device.lat, lng: device.lng }}
+                    position={{
+                      lat: parseFloat(device.lat),
+                      lng: parseFloat(device.lng),
+                    }}
                     icon={icon}
                     onClick={() => handleMarkerClick(device)}
                   />
                   {selectedMarker === device && (
                     <InfoWindowF
-                      position={{ lat: device.lat, lng: device.lng }}
+                      position={{
+                        lat: parseFloat(device.lat),
+                        lng: parseFloat(device.lng),
+                      }}
                       onCloseClick={() => setSelectedMarker(null)}
                     >
                       <div className={styles.infoWindow}>
@@ -258,6 +284,7 @@ function MapView({ isAdmin }) {
                         <p>ID: {device.id}</p>
                         <p>Battery: {device.battery}%</p>
                         <p>Level: {device.level}%</p>
+                        <p>Checked: {device.last_updated}</p>
                         <button className={styles.infoButton}>
                           Submit Feedback
                         </button>
@@ -278,5 +305,85 @@ function MapView({ isAdmin }) {
     </div>
   );
 }
+
+const RegisterNewBinModal = ({ setDevices }) => {
+  const [uniqueID, setuniqueID] = useState("");
+  const [lat, setlat] = useState("");
+  const [lng, setlng] = useState("");
+
+  const clearInputs = () => {
+    setuniqueID("");
+    setlat("");
+    setlng("");
+  };
+
+  const addDevice = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/register-new-device`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        uniqueID,
+        lat,
+        lng,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          setDevices(data.allDevices);
+          console.log(data.msg);
+          clearInputs();
+        }
+      });
+  };
+
+  return (
+    <div className="container my-5">
+      <div className="card mx-auto">
+        <div className="card-body">
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Unique ID"
+              value={uniqueID}
+              onChange={(e) => setuniqueID(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Latitude"
+              value={lat}
+              onChange={(e) => setlat(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Longitude"
+              value={lng}
+              onChange={(e) => setlng(e.target.value)}
+            />
+          </div>
+
+          <div className="d-flex justify-content-between">
+            <button className="btn btn-outline-secondary" onClick={clearInputs}>
+              Clear
+            </button>
+            <button className="btn btn-primary" onClick={addDevice}>
+              Add Device
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default MapView;
