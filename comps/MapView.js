@@ -281,7 +281,7 @@ function MapView({ isAdmin }) {
                     >
                       <div className={styles.infoWindow}>
                         {renderStatusIcons(device.level, device.battery)}
-                        <p>ID: {device.id}</p>
+                        <p>ID: {device.unique_id}</p>
                         <p>Battery: {device.battery}%</p>
                         <p>Level: {device.level}%</p>
                         <p>Checked: {device.last_updated}</p>

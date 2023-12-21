@@ -5,14 +5,16 @@ import Feedback from "../comps/Feedback";
 import ManageEmployees from "../comps/ManageEmployees";
 import Data from "../comps/Data.js";
 import Routes from "../comps/Routes";
-import { devices } from "../aaa_samples/devices";
+// import { devices } from "../aaa_samples/devices";
 import { feedbacks } from "../aaa_samples/feedbacks";
 import styles from "../styles/Dashboard.module.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 function AdminDashboard() {
   const [currentUser, setcurrentUser] = useState(null);
+  const [devices, setdevices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   useEffect(() => {
     setLoading(true);
     // Dynamically import the Bootstrap JS
@@ -34,7 +36,25 @@ function AdminDashboard() {
         .catch((e) => setError(e));
     };
 
+    const getAllDevices = () => {
+      fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.status) {
+            setError(data.msg);
+          } else {
+            setdevices(data.devices);
+          }
+        })
+        .catch((e) => setError(e));
+    };
+
     getUserInfo();
+    getAllDevices();
     setLoading(false);
   }, []);
 
@@ -202,11 +222,11 @@ function AdminDashboard() {
   const alertsData = devices
     .map((device) => {
       if (device.level >= 80 && device.battery < 25) {
-        return { message: `Bin ${device.id}: Full + Low Batt` };
+        return { message: `Bin ${device.unique_id}: Full + Low Batt` };
       } else if (device.level >= 80) {
-        return { message: `Bin ${device.id}: Full` };
+        return { message: `Bin ${device.unique_id}: Full` };
       } else if (device.battery < 25) {
-        return { message: `Bin ${device.id}: Low Batt` };
+        return { message: `Bin ${device.unique_id}: Low Batt` };
       }
       return null;
     })
