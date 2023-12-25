@@ -8,6 +8,8 @@ import {
 import styles from "../styles/MapView.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBatteryQuarter, faTrash } from "@fortawesome/free-solid-svg-icons";
+import socketIO from "socket.io-client";
+const socket = socketIO.connect(process.env.NEXT_PUBLIC_SERVER_LINK);
 
 function MapView({ isAdmin }) {
   const [showRegisterNewBinModal, setshowRegisterNewBinModal] = useState(false);
@@ -17,34 +19,16 @@ function MapView({ isAdmin }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const getAllDevices = () => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.status) {
-          setError(data.msg);
-        } else {
-          setDevices(data.devices);
-        }
-      })
-      .catch((e) => setError(e));
-  };
-
-  // Load devices data
+  // socket load devices data
   useEffect(() => {
-    setIsLoading(true);
     try {
-      getAllDevices();
-    } catch (e) {
-      setError(e);
+      socket.on("request_data", (data) => {
+        setDevices(data);
+      });
+    } catch (error) {
+      setError(error);
     }
-    setIsLoading(false);
-  }, []);
-
+  }, [socket]);
 
   // Other existing state variables
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -69,7 +53,7 @@ function MapView({ isAdmin }) {
   const libraries = ["places"];
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY,
-    libraries: libraries,
+    libraries,
   });
 
   // Function to determine the marker icon based on the bin's level and battery
