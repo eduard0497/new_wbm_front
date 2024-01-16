@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import Login from "../comps/Login";
 import { useRouter } from "next/router";
 
@@ -12,23 +13,34 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     const checkIfLoggedInUserExists = () => {
-      fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_LINK}/verify-user-upon-entering`,
-        {
-          method: "post",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      )
-        .then((res) => res.json())
-        .then(async (data) => {
-          if (!data.status) {
-            return;
-          } else {
-            await router.push("/admin-dashboard");
+      let currentSetCookieID = Cookies.get("user_id");
+      let currentSetCookieJWT = Cookies.get("jwt");
+      if (
+        !currentSetCookieID ||
+        !currentSetCookieJWT ||
+        currentSetCookieJWT.includes("maxAge")
+      ) {
+        return;
+      } else {
+        fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_LINK}/verify-user-upon-entering`,
+          {
+            method: "post",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
           }
-        })
-        .catch((e) => setErrorMessage(e));
+        )
+          .then((res) => res.json())
+          .then(async (data) => {
+            if (!data.status) {
+              console.log(data.msg);
+              return;
+            } else {
+              await router.push("/admin-dashboard");
+            }
+          })
+          .catch((e) => console.log(e));
+      }
     };
 
     checkIfLoggedInUserExists();
