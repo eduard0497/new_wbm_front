@@ -14,7 +14,11 @@ function AdminDashboard() {
   const [currentUser, setcurrentUser] = useState(null);
   const [devices, setdevices] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [currentScreen, setCurrentScreen] = useState("");
+  const [cardContainerStyle, setCardContainerStyle] = useState({
+    display: "block",
+  });
+
   useEffect(() => {
     setLoading(true);
     // Dynamically import the Bootstrap JS
@@ -33,7 +37,7 @@ function AdminDashboard() {
         .then((data) => {
           setcurrentUser(data.userInfo);
         })
-        .catch((e) => setError(e));
+        .catch((e) => console.log(e));
     };
 
     const getAllDevices = () => {
@@ -45,12 +49,12 @@ function AdminDashboard() {
         .then((res) => res.json())
         .then((data) => {
           if (!data.status) {
-            setError(data.msg);
+            console.log(data.msg);
           } else {
             setdevices(data.devices);
           }
         })
-        .catch((e) => setError(e));
+        .catch((e) => console.log(e));
     };
 
     getUserInfo();
@@ -58,123 +62,13 @@ function AdminDashboard() {
     setLoading(false);
   }, []);
 
-  const router = useRouter();
-  const [currentScreen, setCurrentScreen] = useState("");
-  const [cardContainerStyle, setCardContainerStyle] = useState({
-    display: "block",
-  });
-
-  const alerts = devices.filter(
-    (device) => device.level >= 80 || device.battery < 25
-  );
-
-  const fullBins = devices.filter((device) => device.level >= 80).length;
-  const lowBattery = devices.filter((device) => device.battery < 25).length;
-
-  const AlertsPanel = ({ alerts }) => {
-    return (
-      <div className={styles.alerts_panel}>
-        <h5>Alerts ({alerts.length})</h5>
-        {alerts.map((alert, index) => (
-          <div
-            key={index}
-            className={`
-              ${styles.alert_item} 
-              ${
-                alert.message.includes("Full + Low Batt")
-                  ? styles.alert_combined
-                  : ""
-              }
-              ${alert.message.includes("Full") ? styles.alert_full : ""}
-              ${alert.message.includes("Low Batt") ? styles.alert_low : ""}
-            `}
-          >
-            {alert.message}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const QuickStats = ({ stats }) => {
-    // stats
-    return (
-      <div className="quick-stats">
-        {/* Render stats here */}
-        <h5>Overview</h5>
-        <div>Total Bins: {stats.totalBins}</div>
-        <div>Full Bins: {stats.fullBins}</div>
-        {/* add any other stats */}
-      </div>
-    );
-  };
-
-  const RecentActivityFeed = ({ activities }) => {
-    return (
-      <div className="activity-feed">
-        <h5>Recent Activity</h5>
-        {activities.map((activity, index) => (
-          <div key={index}>
-            <div>Date: {activity.date}</div>
-            <div>Bin: {activity.device}</div>
-            <div>Description: {activity.description}</div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  // Dashboard cards
-  const DashboardCards = ({ role }) => (
-    <div className={styles.dashboard}>
-      {/* Card for Data */}
-      {role === "admin" ? (
-        <div className={styles.card} onClick={() => setCurrentScreen("data")}>
-          <i className="bi bi-bar-chart-fill"></i>
-          <h3>Data</h3>
-        </div>
-      ) : null}
-
-      {/* Card for MapView */}
-      <div className={styles.card} onClick={() => setCurrentScreen("mapView")}>
-        <i className="bi bi-trash"></i>
-        <h3>Bins</h3>
-      </div>
-
-      {/* Card for Routes */}
-      <div className={styles.card} onClick={() => setCurrentScreen("routes")}>
-        <i className="bi bi-map"></i>
-        <h3>Routes</h3>
-      </div>
-
-      {/* Card for Employees */}
-      {role === "admin" ? (
-        <div
-          className={styles.card}
-          onClick={() => setCurrentScreen("employees")}
-        >
-          <i className="bi bi-people-fill"></i>
-          <h3>Employees</h3>
-        </div>
-      ) : null}
-
-      {/* Card for Feedback */}
-      <div className={styles.card} onClick={() => setCurrentScreen("feedback")}>
-        <i className="bi bi-envelope-fill"></i>
-        <h3>Feedback</h3>
-      </div>
-
-      {/* Additional cards as needed */}
-    </div>
-  );
-
   useEffect(() => {
     if (currentScreen === "") {
       setCardContainerStyle({ display: "block" });
     } else {
       setCardContainerStyle({ display: "none" });
     }
-  }, [currentScreen]); // Only re-run the effect if currentScreen changes
+  }, [currentScreen]);
 
   const showScreen = () => {
     switch (currentScreen) {
@@ -193,18 +87,237 @@ function AdminDashboard() {
     }
   };
 
-  // Call this function to go back to the dashboard view
-  const goBackToDashboard = () => {
-    setCurrentScreen("");
-  };
+  if (loading || !currentUser) {
+    return <h1>LOADING...</h1>;
+  }
 
+  return (
+    <>
+      <Navbar currentUser={currentUser} setCurrentScreen={setCurrentScreen} />
+
+      {/* Sidebar with QuickStats, AlertsPanel, and RecentActivityFeed */}
+      <div className={styles.sidebar}>
+        <QuickStats devices={devices} />
+        <AlertsPanel devices={devices} />
+        <RecentActivityFeed feedbacks={feedbacks} />
+      </div>
+
+      <div className={`container ${styles.dashboardContainer}`}>
+        <div className={styles.cardContainer} style={cardContainerStyle}>
+          <DashboardCards
+            role={currentUser.role}
+            setCurrentScreen={setCurrentScreen}
+          />
+        </div>
+
+        {/* Render the selected screen */}
+        {showScreen()}
+      </div>
+    </>
+  );
+}
+
+export default AdminDashboard;
+
+const Navbar = ({ currentUser, setCurrentScreen }) => {
+  const router = useRouter();
+  const logout = async () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/logout`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        console.log(data.msg);
+        await router.push("/");
+      });
+  };
+  return (
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div className="container-fluid">
+        <a
+          className="navbar-brand"
+          onClick={() => setCurrentScreen("")}
+          href="#"
+        >
+          WBM
+        </a>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <div
+          className="collapse navbar-collapse justify-content-center"
+          id="navbarNavAltMarkup"
+        >
+          <div className="navbar-nav">
+            <button className="nav-link" onClick={() => setCurrentScreen("")}>
+              <i className="bi bi-house"></i> Home
+            </button>
+            {currentUser.role === "admin" ? (
+              <button
+                className="nav-link"
+                onClick={() => setCurrentScreen("data")}
+              >
+                <i className="bi bi-bar-chart-fill"></i> Data
+              </button>
+            ) : null}
+            <button
+              className="nav-link"
+              aria-current="page"
+              onClick={() => setCurrentScreen("mapView")}
+            >
+              <i className="bi bi-trash"></i> Bins
+            </button>
+            <button
+              className="nav-link"
+              aria-current="page"
+              onClick={() => setCurrentScreen("routes")}
+            >
+              <i className="bi bi-map"></i> Routes
+            </button>
+            {currentUser.role === "admin" ? (
+              <button
+                className="nav-link"
+                onClick={() => setCurrentScreen("employees")}
+              >
+                <i className="bi bi-people-fill"></i> Employees
+              </button>
+            ) : null}
+            <button
+              className="nav-link"
+              onClick={() => setCurrentScreen("feedback")}
+            >
+              <i className="bi bi-envelope-fill"></i> Feedback
+            </button>
+            <button className="nav-link" onClick={logout}>
+              <i className="bi bi-box-arrow-right"></i> Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+const DashboardCards = ({ role, setCurrentScreen }) => (
+  <div className={styles.dashboard}>
+    {/* Card for Data */}
+    {role === "admin" ? (
+      <div className={styles.card} onClick={() => setCurrentScreen("data")}>
+        <i className="bi bi-bar-chart-fill"></i>
+        <h3>Data</h3>
+      </div>
+    ) : null}
+
+    {/* Card for MapView */}
+    <div className={styles.card} onClick={() => setCurrentScreen("mapView")}>
+      <i className="bi bi-trash"></i>
+      <h3>Bins</h3>
+    </div>
+
+    {/* Card for Routes */}
+    <div className={styles.card} onClick={() => setCurrentScreen("routes")}>
+      <i className="bi bi-map"></i>
+      <h3>Routes</h3>
+    </div>
+
+    {/* Card for Employees */}
+    {role === "admin" ? (
+      <div
+        className={styles.card}
+        onClick={() => setCurrentScreen("employees")}
+      >
+        <i className="bi bi-people-fill"></i>
+        <h3>Employees</h3>
+      </div>
+    ) : null}
+
+    {/* Card for Feedback */}
+    <div className={styles.card} onClick={() => setCurrentScreen("feedback")}>
+      <i className="bi bi-envelope-fill"></i>
+      <h3>Feedback</h3>
+    </div>
+
+    {/* Additional cards as needed */}
+  </div>
+);
+
+const AlertsPanel = ({ devices }) => {
+  const alerts = devices
+    .map((device) => {
+      if (device.level >= 80 && device.battery < 25) {
+        return { message: `Bin ${device.unique_id}: Full + Low Batt` };
+      } else if (device.level >= 80) {
+        return { message: `Bin ${device.unique_id}: Full` };
+      } else if (device.battery < 25) {
+        return { message: `Bin ${device.unique_id}: Low Batt` };
+      }
+      return null;
+    })
+    .filter((alert) => alert !== null); // Filter out the null entries
+
+  if (alerts.length > 0) {
+    return (
+      <div className={styles.alerts_item}>
+        <div className={styles.alerts_panel}>
+          <h5>Alerts ({alerts.length})</h5>
+          {alerts.map((alert, index) => (
+            <div
+              key={index}
+              className={`
+                ${styles.alert_item} 
+                ${
+                  alert.message.includes("Full + Low Batt")
+                    ? styles.alert_combined
+                    : ""
+                }
+                ${alert.message.includes("Full") ? styles.alert_full : ""}
+                ${alert.message.includes("Low Batt") ? styles.alert_low : ""}
+              `}
+            >
+              {alert.message}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  } else {
+    return null;
+  }
+};
+
+const QuickStats = ({ devices }) => {
+  const fullBins = devices.filter((device) => device.level >= 80).length;
+  const lowBattery = devices.filter((device) => device.battery < 25).length;
   const stats = {
     totalBins: devices.length,
     fullBins: fullBins,
     lowBattery: lowBattery,
-    // if more stats
   };
+  // stats
+  return (
+    <div className={styles.stats_item}>
+      <div className="quick-stats">
+        {/* Render stats here */}
+        <h5>Overview</h5>
+        <div>Total Bins: {stats.totalBins}</div>
+        <div>Full Bins: {stats.fullBins}</div>
+        {/* add any other stats */}
+      </div>
+    </div>
+  );
+};
 
+const RecentActivityFeed = ({ feedbacks }) => {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -219,143 +332,22 @@ function AdminDashboard() {
       description: feedback.description, // The description of the feedback
     }));
 
-  const alertsData = devices
-    .map((device) => {
-      if (device.level >= 80 && device.battery < 25) {
-        return { message: `Bin ${device.unique_id}: Full + Low Batt` };
-      } else if (device.level >= 80) {
-        return { message: `Bin ${device.unique_id}: Full` };
-      } else if (device.battery < 25) {
-        return { message: `Bin ${device.unique_id}: Low Batt` };
-      }
-      return null;
-    })
-    .filter((alert) => alert !== null); // Filter out the null entries
-
-  const logout = async () => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/logout`, {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then(async (data) => {
-        console.log(data.msg);
-        await router.push("/");
-      });
-  };
-
-  if (loading || !currentUser) {
-    return <h1>LOADING...</h1>;
-  }
-
-  return (
-    <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div className="container-fluid">
-          <a
-            className="navbar-brand"
-            onClick={() => setCurrentScreen("")}
-            href="#"
-          >
-            WBM
-          </a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div
-            className="collapse navbar-collapse justify-content-center"
-            id="navbarNavAltMarkup"
-          >
-            <div className="navbar-nav">
-              <button className="nav-link" onClick={() => setCurrentScreen("")}>
-                <i className="bi bi-house"></i> Home
-              </button>
-              {currentUser.role === "admin" ? (
-                <button
-                  className="nav-link"
-                  onClick={() => setCurrentScreen("data")}
-                >
-                  <i className="bi bi-bar-chart-fill"></i> Data
-                </button>
-              ) : null}
-              <button
-                className="nav-link"
-                aria-current="page"
-                onClick={() => setCurrentScreen("mapView")}
-              >
-                <i className="bi bi-trash"></i> Bins
-              </button>
-              <button
-                className="nav-link"
-                aria-current="page"
-                onClick={() => setCurrentScreen("routes")}
-              >
-                <i className="bi bi-map"></i> Routes
-              </button>
-              {currentUser.role === "admin" ? (
-                <button
-                  className="nav-link"
-                  onClick={() => setCurrentScreen("employees")}
-                >
-                  <i className="bi bi-people-fill"></i> Employees
-                </button>
-              ) : null}
-              <button
-                className="nav-link"
-                onClick={() => setCurrentScreen("feedback")}
-              >
-                <i className="bi bi-envelope-fill"></i> Feedback
-              </button>
-              <button className="nav-link" onClick={logout}>
-                <i className="bi bi-box-arrow-right"></i> Log Out
-              </button>
+  if (activities.length > 0) {
+    return (
+      <div className={styles.feed_item}>
+        <div className="activity-feed">
+          <h5>Recent Activity</h5>
+          {activities.map((activity, index) => (
+            <div key={index}>
+              <div>Date: {activity.date}</div>
+              <div>Bin: {activity.device}</div>
+              <div>Description: {activity.description}</div>
             </div>
-          </div>
+          ))}
         </div>
-      </nav>
-
-      {/* Sidebar with QuickStats, AlertsPanel, and RecentActivityFeed */}
-      <div className={styles.sidebar}>
-        {/* Quick Stats */}
-        <div className={styles.stats_item}>
-          <QuickStats stats={stats} />
-        </div>
-
-        {/* Alerts Panel */}
-        {alertsData.length > 0 && (
-          <div className={styles.alerts_item}>
-            <AlertsPanel alerts={alertsData} />
-          </div>
-        )}
-
-        {/* Recent Activity Feed */}
-        {activities.length > 0 && (
-          <div className={styles.feed_item}>
-            <RecentActivityFeed activities={activities} />
-          </div>
-        )}
       </div>
-
-      <div className={`container ${styles.dashboardContainer}`}>
-        <div className={styles.cardContainer} style={cardContainerStyle}>
-          <DashboardCards role={currentUser.role} />
-          {/* ... */}
-        </div>
-
-        {/* Render the selected screen */}
-        {showScreen()}
-      </div>
-    </>
-  );
-}
-
-export default AdminDashboard;
+    );
+  } else {
+    return null;
+  }
+};

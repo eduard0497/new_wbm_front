@@ -6,9 +6,6 @@ import styles from '../styles/Data.module.css';
 
 function Data() {
 
-
-
-
   // State to hold selected date range for analytics
   const [dateRange, setDateRange] = useState({
     startDate: "",

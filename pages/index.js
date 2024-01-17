@@ -6,9 +6,7 @@ import { useRouter } from "next/router";
 export default function Home() {
   const router = useRouter();
 
-  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  console.log(errorMessage);
 
   useEffect(() => {
     setLoading(true);
