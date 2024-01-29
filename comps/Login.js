@@ -14,7 +14,7 @@ function Login() {
       return;
     }
 
-    fetch(`https://csun-wbm-server-c8c559eb164e.herokuapp.com/login`, {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/login`, {
       method: "post",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
