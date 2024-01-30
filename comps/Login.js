@@ -14,6 +14,8 @@ function Login() {
       return;
     }
 
+    console.log(`${process.env.NEXT_PUBLIC_SERVER_LINK}/login`);
+
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/login`, {
       method: "post",
       headers: { "Content-Type": "application/json" },
