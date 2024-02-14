@@ -9,9 +9,6 @@ function Feedback() {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value.toLowerCase());
-  };
 
   const filteredFeedbacks = searchTerm
     ? sortedFeedbacks.filter((feedback) =>
@@ -162,7 +159,7 @@ function Feedback() {
         <input
           type="text"
           placeholder="Search..."
-          onChange={handleSearchChange}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className={styles.search_input}
         />
         <table className={styles.feedback_table}>
