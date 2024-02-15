@@ -294,13 +294,13 @@ const RegisterNewBinModal = ({ setDevices }) => {
   const [uniqueID, setuniqueID] = useState("");
   const [lat, setlat] = useState("");
   const [lng, setlng] = useState("");
-  const [binHeight, setbinHeight] = useState(0);
+  const [binHeight, setbinHeight] = useState("");
 
   const clearInputs = () => {
     setuniqueID("");
     setlat("");
     setlng("");
-    setbinHeight(0);
+    setbinHeight("");
   };
 
   const addDevice = () => {
@@ -312,7 +312,7 @@ const RegisterNewBinModal = ({ setDevices }) => {
         uniqueID,
         lat,
         lng,
-        binHeight,
+        binHeight: parseInt(binHeight),
       }),
     })
       .then((response) => response.json())
