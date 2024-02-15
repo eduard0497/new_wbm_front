@@ -294,11 +294,13 @@ const RegisterNewBinModal = ({ setDevices }) => {
   const [uniqueID, setuniqueID] = useState("");
   const [lat, setlat] = useState("");
   const [lng, setlng] = useState("");
+  const [binHeight, setbinHeight] = useState(0);
 
   const clearInputs = () => {
     setuniqueID("");
     setlat("");
     setlng("");
+    setbinHeight(0);
   };
 
   const addDevice = () => {
@@ -310,6 +312,7 @@ const RegisterNewBinModal = ({ setDevices }) => {
         uniqueID,
         lat,
         lng,
+        binHeight,
       }),
     })
       .then((response) => response.json())
@@ -353,6 +356,15 @@ const RegisterNewBinModal = ({ setDevices }) => {
               placeholder="Longitude"
               value={lng}
               onChange={(e) => setlng(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Bin Height"
+              value={binHeight}
+              onChange={(e) => setbinHeight(e.target.value)}
             />
           </div>
 
