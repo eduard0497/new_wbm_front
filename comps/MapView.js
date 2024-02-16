@@ -156,9 +156,11 @@ function MapView({ isAdmin }) {
           <tr>
             <th>ID</th>
             <th>Alerts</th>
+            <th>Bin Height</th>
             <th>Level</th>
             <th>Battery</th>
             <th>Last Checked</th>
+            <th>Reception</th>
             <th>Controls</th>
           </tr>
         </thead>
@@ -175,9 +177,11 @@ function MapView({ isAdmin }) {
                   {renderStatusIcons(device.level, device.battery)}
                 </div>
               </td>
+              <td>{device.bin_height}</td>
               <td>{device.level}%</td>
               <td>{device.battery}%</td>
-              <td>{device.last_updated}</td>
+              <td>{new Date(device.timestmap).toLocaleString()}</td>
+              <td>{device.reception}</td>
               <td className={styles.devices_table_control_buttons}>
                 <button className={styles.submenu_button}>
                   Submit Feedback
@@ -290,96 +294,139 @@ function MapView({ isAdmin }) {
   );
 }
 
-const RegisterNewBinModal = ({ setDevices }) => {
-  const [uniqueID, setuniqueID] = useState("");
-  const [lat, setlat] = useState("");
-  const [lng, setlng] = useState("");
-  const [binHeight, setbinHeight] = useState("");
+const RegisterNewBinModal = () => {
+  const [loadingTempDevices, setloadingTempDevices] = useState(false);
+  const [unknownDevices, setunknownDevices] = useState([]);
 
-  const clearInputs = () => {
-    setuniqueID("");
-    setlat("");
-    setlng("");
-    setbinHeight("");
-  };
-
-  const addDevice = () => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/register-new-device`, {
+  const getTemporaryDevices = () => {
+    setloadingTempDevices(true);
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-unknown-devices`, {
       method: "post",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        uniqueID,
-        lat,
-        lng,
-        binHeight: parseInt(binHeight),
-      }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (!data.status) {
-          console.log(data.msg);
+          console.log("Error");
         } else {
-          setDevices(data.allDevices);
-          console.log(data.msg);
-          clearInputs();
+          setunknownDevices(data.unknown_devices);
         }
       });
+    setloadingTempDevices(false);
   };
+
+  useEffect(() => {
+    getTemporaryDevices();
+  }, []);
 
   return (
     <div className="container my-5">
-      <div className="card mx-auto">
-        <div className="card-body">
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Unique ID"
-              value={uniqueID}
-              onChange={(e) => setuniqueID(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Latitude"
-              value={lat}
-              onChange={(e) => setlat(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Longitude"
-              value={lng}
-              onChange={(e) => setlng(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Bin Height"
-              value={binHeight}
-              onChange={(e) => setbinHeight(e.target.value)}
-            />
-          </div>
-
-          <div className="d-flex justify-content-between">
-            <button className="btn btn-outline-secondary" onClick={clearInputs}>
-              Clear
-            </button>
-            <button className="btn btn-primary" onClick={addDevice}>
-              Add Device
-            </button>
-          </div>
-        </div>
+      <div className={styles.unknown_devices_container}>
+        {loadingTempDevices ? (
+          <h1>Loading Unknown Devices...</h1>
+        ) : (
+          <>
+            {unknownDevices.length == 0
+              ? null
+              : unknownDevices.map((device) => {
+                  return (
+                    <UnknownBin
+                      key={device.id}
+                      device={device}
+                      getTemporaryDevices={getTemporaryDevices}
+                    />
+                  );
+                })}
+          </>
+        )}
       </div>
     </div>
   );
 };
 
 export default MapView;
+
+const UnknownBin = ({ device, getTemporaryDevices }) => {
+  const [lat, setlat] = useState("");
+  const [lng, setlng] = useState("");
+  const [binHeight, setbinHeight] = useState("");
+
+  const clearInputs = () => {
+    setlat("");
+    setlng("");
+    setbinHeight("");
+  };
+
+  const registerUnknownDevice = () => {
+    fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_LINK}/employee-register-unknown-bin`,
+      {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          id: device.id,
+          lat,
+          lng,
+          bin_height: parseInt(binHeight),
+        }),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          console.log(data.msg);
+          getTemporaryDevices();
+          clearInputs();
+        }
+      });
+  };
+
+  return (
+    <div className={styles.unknown_devices_container_device}>
+      <p>Device ID: {device.unique_id}</p>
+      <p>Battery: {device.battery}</p>
+      <p>Level: {device.level}</p>
+      <p>Reception: {device.reception}</p>
+      <p>Last Checked: {new Date(device.timestamp).toLocaleString()}</p>
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Latitude"
+          value={lat}
+          onChange={(e) => setlat(e.target.value)}
+        />
+      </div>
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Longitude"
+          value={lng}
+          onChange={(e) => setlng(e.target.value)}
+        />
+      </div>
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Bin Height"
+          value={binHeight}
+          onChange={(e) => setbinHeight(e.target.value)}
+        />
+      </div>
+      <div className="d-flex justify-content-between">
+        <button className="btn btn-outline-secondary" onClick={clearInputs}>
+          Clear
+        </button>
+        <button className="btn btn-primary" onClick={registerUnknownDevice}>
+          Add Device
+        </button>
+      </div>
+    </div>
+  );
+};

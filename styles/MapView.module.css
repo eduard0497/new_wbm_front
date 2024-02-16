@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 50px;
+  /* padding-top: 50px; */
+  padding-bottom: 200px;
   width: 100%;
 }
 
@@ -223,4 +224,22 @@
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.unknown_devices_container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.unknown_devices_container_device {
+  padding: 15px;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+.unknown_devices_container_device > p {
+  margin-bottom: 5px;
+  color: black;
 }
