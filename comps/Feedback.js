@@ -13,7 +13,7 @@ function Feedback() {
   const filteredFeedbacks = searchTerm
     ? sortedFeedbacks.filter((feedback) =>
         Object.values(feedback).some((value) =>
-          value.toString().toLowerCase().includes(searchTerm)
+          value !== null && value.toString().toLowerCase().includes(searchTerm)
         )
       )
     : sortedFeedbacks;
