@@ -180,7 +180,7 @@ function MapView({ isAdmin }) {
               <td>{device.bin_height}</td>
               <td>{device.level}%</td>
               <td>{device.battery}%</td>
-              <td>{new Date(device.timestmap).toLocaleString()}</td>
+              <td>{new Date(device.timestamp).toLocaleString()}</td>
               <td>{device.reception}</td>
               <td className={styles.devices_table_control_buttons}>
                 <button className={styles.submenu_button}>
