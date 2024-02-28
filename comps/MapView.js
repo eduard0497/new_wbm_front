@@ -28,11 +28,12 @@ function MapView({ isAdmin }) {
           let distanceInCM = device.level;
           let binHeight = device.bin_height;
           let trashHeight = binHeight - distanceInCM;
-          if (trashHeight > binHeight) {
-            device.level = 100;
-          } else {
-            device.level = parseInt((trashHeight * 100) / binHeight);
-          }
+          device.level = trashHeight / binHeight;
+          // if (trashHeight > binHeight) {
+          //   device.level = 100;
+          // } else {
+          //   device.level = parseInt((trashHeight * 100) / binHeight);
+          // }
         });
         setDevices(tmpDevices);
       });
