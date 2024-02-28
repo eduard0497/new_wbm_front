@@ -23,7 +23,14 @@ function MapView({ isAdmin }) {
   useEffect(() => {
     try {
       socket.on("request_data", (data) => {
-        setDevices(data);
+        let tmpDevices = data;
+        tmpDevices.map((device) => {
+          let distanceInCM = device.level;
+          let binHeight = device.bin_height;
+          let trashHeight = binHeight - distanceInCM;
+          device.level = parseInt((trashHeight * 100) / binHeight);
+        });
+        setDevices(tmpDevices);
       });
     } catch (error) {
       setError(error);
