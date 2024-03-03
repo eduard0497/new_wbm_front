@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import MapView from "../comps/MapView";
+import DevicesContainer from "../comps/DevicesTab/DevicesContainer";
 import Feedback from "../comps/Feedback";
 import ManageEmployees from "../comps/ManageEmployees";
 import Data from "../comps/Data.js";
@@ -9,6 +9,8 @@ import Routes from "../comps/Routes";
 import { feedbacks } from "../aaa_samples/feedbacks";
 import styles from "../styles/Dashboard.module.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import socketIO from "socket.io-client";
+const socket = socketIO.connect(process.env.NEXT_PUBLIC_SERVER_LINK);
 
 function AdminDashboard() {
   const [currentUser, setcurrentUser] = useState(null);
@@ -40,27 +42,26 @@ function AdminDashboard() {
         .catch((e) => console.log(e));
     };
 
-    const getAllDevices = () => {
-      fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (!data.status) {
-            console.log(data.msg);
-          } else {
-            setdevices(data.devices);
-          }
-        })
-        .catch((e) => console.log(e));
-    };
-
     getUserInfo();
-    getAllDevices();
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    try {
+      socket.on("request_data", (data) => {
+        let tmpDevices = data;
+        tmpDevices.map((device) => {
+          let distanceInCM = device.level;
+          let binHeight = device.bin_height;
+          let trashHeight = binHeight - distanceInCM;
+          device.level = parseInt((trashHeight * 100) / binHeight);
+        });
+        setdevices(tmpDevices);
+      });
+    } catch (error) {
+      setError(error);
+    }
+  }, [socket]);
 
   useEffect(() => {
     if (currentScreen === "") {
@@ -73,7 +74,7 @@ function AdminDashboard() {
   const showScreen = () => {
     switch (currentScreen) {
       case "mapView":
-        return <MapView isAdmin={true} />;
+        return <DevicesContainer isAdmin={true} devices={devices} />;
       case "routes":
         return <Routes />;
       case "employees":

@@ -24,8 +24,19 @@
   font-size: 1rem;
 }
 
+.green_button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #4caf50; /* Example button color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
 .view_toggle button.active {
-  background-color: #2d7a31; /* Darker shade on hover */
+  background-color: #174d1a; /* Darker shade on hover */
 }
 
 .list_container {
@@ -148,7 +159,8 @@
 }
 
 .register_button_container {
-  margin-bottom: 10px; /* Or any other spacing you prefer */
+  margin-bottom: 0px; /* Or any other spacing you prefer */
+  text-align: center;
   /* Add any other styles you want for this container */
 }
 
@@ -229,6 +241,7 @@
 .unknown_devices_container {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 20px;
 }
