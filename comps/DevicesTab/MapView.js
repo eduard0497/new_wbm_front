@@ -5,24 +5,28 @@ import {
   GoogleMap,
   MarkerF,
   InfoWindowF,
+  DirectionsRenderer
 } from "@react-google-maps/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBatteryQuarter, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-function MapView({ devices }) {
+
+//Moved some map options outside functions to keep from refreshing to default every few seconds if changed by user
+const mapCenter = { lat: 34.242245312686954, lng: -118.53043313617162 }; 
+const mapOptions = {
+  mapTypeId: 'satellite',
+  clickableIcons: true,
+  scrollwheel: true,
+};
+
+function MapView({ devices, mapWidth, mapHeight, directions }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const handleMarkerClick = (device) => {
     setSelectedMarker(device);
   };
   const zoomDistance = 16;
-  const mapWidth = "800px";
-  const mapHeight = "800px";
-  const mapCenter = { lat: 34.242245312686954, lng: -118.53043313617162 };
-  const mapOptions = {
-    disableDefaultUI: true,
-    clickableIcons: true,
-    scrollwheel: true,
-  };
+
+
   const libraries = ["places"];
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY,
@@ -67,11 +71,11 @@ function MapView({ devices }) {
 
   const getStatusColor = (level, battery) => {
     if (level >= 80 && battery <= 25) {
-      return "orange"; // Both full bin and low battery
+      return "purple"; // Both full bin and low battery
     } else if (level >= 80) {
       return "red"; // Full bin
     } else if (battery <= 25) {
-      return "yellow"; // Low battery
+      return "orange"; // Low battery
     } else {
       return "green"; // No issues
     }
@@ -83,9 +87,10 @@ function MapView({ devices }) {
         options={mapOptions}
         zoom={zoomDistance}
         center={mapCenter}
-        mapTypeId={window.google.maps.MapTypeId.ROADMAP}
         mapContainerStyle={{ width: mapWidth, height: mapHeight }}
+        key={directions ? 'with-directions' : 'no-directions'}
       >
+        {directions && <DirectionsRenderer directions={directions} />}
         {devices.map((device) => {
           const icon = getMarkerIcon(device.level, device.battery);
           return (

@@ -218,13 +218,13 @@
 }
 
 .alert_low {
-  border-left: 5px solid yellow; /* Bootstrap's `warning` color for low battery */
+  border-left: 5px solid orange; /* Bootstrap's `warning` color for low battery */
   color: white;
   background-color:rgb(63, 63, 63);
 }
 
 .alert_combined {
-  border-left: 5px solid orange;/* Bootstrap's `info` color for full bin + low battery */
+  border-left: 5px solid purple;/* Bootstrap's `info` color for full bin + low battery */
   color: white;
   background-color:rgb(63, 63, 63);
 }

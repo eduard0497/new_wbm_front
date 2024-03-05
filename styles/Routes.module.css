@@ -1,5 +1,14 @@
 /* Routes.module.css */
 
+.contentContainer {
+  display: flex;
+  justify-content: center; /* Ensures content is evenly spaced */
+  align-items: center; /* Aligns items at the top */
+  gap: 30px; 
+  flex-wrap: wrap;
+}
+
+
 .routesContainer {
     padding: 20px;
     max-width: 1000px;
@@ -15,6 +24,7 @@
   }
   
   .binsList {
+    flex: 1;
     margin-top: 10px;
     margin-bottom: 15px;
   }
@@ -27,34 +37,139 @@
     border-radius: 4px;
   }
   
-  .startRouteButton {
-    padding: 5px 15px;
+  .startRouteButton, .modeButton { /* modeButton class added for travel mode buttons */
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    font-weight: bold;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    background-color: #4CAF50;
+    background-color: #007bff; /* Blue background for mode buttons */
     color: white;
-    transition: background-color 0.2s;
-  }
-  
-  .startRouteButton:hover {
-    background-color: #45a049;
-  }
-  
-  .startRouteButton:disabled {
-    background-color: #ccc;
-    cursor: default;
-  }
+    transition: background-color 0.2s, opacity 0.2s;
+}
 
-  .filtersContainer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+.startRouteButton {
+    background-color: #4CAF50; /* Green background for the start route button */
+}
+
+.startRouteButton:hover, .modeButton:hover {
+    opacity: 0.8;
+}
+
+.startRouteButton:disabled, .modeButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.modeButton:active{
+  background-color: red;
+}
+
+.filtersContainer {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
+  background-color: #f8f9fa; /* Slightly off-white for subtle contrast */
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px; /* Provides internal spacing */
+  justify-content: center;
+}
   
   .filtersContainer label {
     display: flex;
     align-items: center;
     gap: 5px;
+    background-color: #e9ecef; /* Light gray background for contrast */
+    padding: 5px 10px;
+    border-radius: 20px; /* Rounded edges for a modern look */
   }
+
+
+
+  .routeSummary {
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    flex-direction: row;
+  }
+  
+  .binsDetails {
+    margin-top: 10px;
+  }
+  
+  .binItem + .binItem {
+    border-top: 1px solid #eee; /* Adds a subtle separator between bin items */
+  }
+  
+  .binItem p {
+    margin: 5px 0; /* Reduces space for a compact look */
+  }
+  
+
+  
+  .routeSummary h3 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .routeSummary p {
+    color: #666;
+    font-size: 16px;
+  }
+
+  .lowBattery {
+    background-color: #f9f9f9;
+    padding: 1px 5px;
+    margin-top: 5px;
+    font-size: 14px;
+    border-left: 3px solid orange;
+  }
+  
+  .emptyBin {
+    background-color: #f9f9f9;
+    padding: 1px 5px;
+    margin-top: 5px;
+    font-size: 14px;
+    border-left: 3px solid red;
+  }
+
+.estimatedTimeContainer {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px; /* Adjust the space between text and the dropdown */
+}
+
+.modeDropdown {
+  padding: 2px 5px; /* Reduce padding to fit within a sentence */
+  background-color: transparent; /* Or any color that fits your design */
+  border: 1px solid #ccc; /* Minimal border to keep it subtle */
+  border-radius: 4px; /* Optional: Rounded corners */
+  color: #007bff; /* Text color for dropdown, can match link color for consistency */
+  font-size: 16px; /* Match the surrounding text size */
+}
+
+.modeDropdown:focus {
+  outline: none;
+  border-color: #007bff; /* Highlight color on focus */
+}
+
+  @media (max-width: 768px) {
+  .contentContainer {
+    flex-direction: column; /* Stack map and summary vertically on smaller screens */
+  }
+
+  .modeButton, .startRouteButton {
+    width: 100%; /* Full-width buttons for easier interaction on small screens */
+    margin-bottom: 10px; /* Add more space between buttons */
+  }
+}

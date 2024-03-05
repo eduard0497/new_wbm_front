@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* padding-top: 50px; */
+
   padding-bottom: 200px;
   width: 100%;
 }
@@ -16,7 +16,7 @@
 .view_toggle button {
   margin: 10px;
   padding: 10px 20px;
-  background-color: #4caf50; /* Example button color */
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 5px;
@@ -27,7 +27,7 @@
 .green_button {
   margin: 10px;
   padding: 10px 20px;
-  background-color: #4caf50; /* Example button color */
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 5px;
@@ -36,7 +36,7 @@
 }
 
 .view_toggle button.active {
-  background-color: #174d1a; /* Darker shade on hover */
+  background-color: #174d1a; 
 }
 
 .list_container {
@@ -50,26 +50,26 @@
 
 .list_item {
   display: flex;
-  flex-direction: column; /* Adjusted for submenu */
-  align-items: flex-start; /* Align content to the start */
-  background-color: #e9ebee; /* Darker background for list items */
-  color: #000000; /* Lighter text color for visibility */
+  flex-direction: column; 
+  align-items: flex-start;
+  background-color: #e9ebee;
+  color: #000000; 
   padding: 20px;
   margin-bottom: 10px;
   width: 100%;
   max-width: 600px;
 
-  cursor: pointer; /* Indicate the items are clickable */
-  padding: 20px; /* Increased padding */
-  border-radius: 8px; /* Slightly larger border radius for modern look */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
-  transition: transform 0.3s ease; /* Smooth transition for hover effect */
+  cursor: pointer; 
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease; 
 }
 
 .low_battery_icon,
 .full_bin_icon {
-  font-size: 24px; /* Larger font size for icons */
-  /* If using emojis or text, set a larger size. If using images, set width and height instead. */
+  font-size: 24px; 
+
 }
 
 .list_item p {
@@ -81,23 +81,23 @@
 }
 
 .list_item:hover {
-  transform: translateY(-2px); /* Slight lift effect on hover */
+  transform: translateY(-2px);
 }
 
 .submenu {
   display: flex;
-  flex-direction: column; /* Submenu items stacked vertically */
-  background-color: #e9ebee; /* Submenu background */
+  flex-direction: column; 
+  background-color: #e9ebee; 
   padding: 10px;
-  margin-top: 10px; /* Space between item content and submenu */
-  width: calc(100% - 20px); /* Full width minus padding */
+  margin-top: 10px; 
+  width: calc(100% - 20px); 
 }
 
 .submenu_button {
-  background-color: #4caf50; /* Button background */
-  color: rgb(255, 255, 255); /* Button text color */
+  background-color: #4caf50; 
+  color: rgb(255, 255, 255); 
   padding: 10px;
-  margin-bottom: 5px; /* Space between buttons */
+  margin-bottom: 5px; 
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -105,7 +105,7 @@
 }
 
 .submenu_button:hover {
-  background-color: #45a049; /* Darken button on hover */
+  background-color: #45a049; 
 }
 
 .infoWindow {
@@ -115,53 +115,53 @@
 }
 
 .infoWindow p {
-  color: #000000; /* This sets the text color to black */
-  /* any other specific styles for <p> inside .infoWindow */
+  color: #000000; 
+ 
 }
 .infoButton {
-  background-color: #4caf50; /* Button background */
-  color: white; /* Button text color */
+  background-color: #4caf50; 
+  color: white; 
   padding: 5px 10px;
-  margin-top: 5px; /* Space between buttons */
+  margin-top: 5px; 
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 0.8rem; /* Smaller font size for buttons in the InfoWindow */
+  font-size: 0.8rem; 
 }
 
 .infoButton:hover {
-  background-color: #45a049; /* Darken button on hover */
+  background-color: #45a049;
 }
 
 .icon {
-  font-size: 24px; /* Adjust the size as needed */
-  margin-right: 8px; /* Adjust the spacing as needed */
-  /* Add color or other styles as desired */
+  font-size: 24px; 
+  margin-right: 8px; 
+
 }
 
 .list_item_full {
-  border-left: 5px solid red; /* Flagged items with a red border */
+  border-left: 5px solid red; 
 }
 
 .list_item_ok {
-  border-left: 5px solid rgb(35, 194, 35); /* Non-flagged items with a green border */
+  border-left: 5px solid rgb(35, 194, 35); 
 }
 
 .list_item_low_battery {
-  /* Low battery - yellow background */
-  border-left: 5px solid yellow; /* Non-flagged items with a green border */
+
+  border-left: 5px solid orange;
 }
 
 .list_item_critical {
-  /* Both full bin and low battery - orange background */
-  border-left: 5px solid orange; /* Non-flagged items with a green border */
+
+  border-left: 5px solid purple;
 }
 
 .register_button_container {
-  margin-bottom: 0px; /* Or any other spacing you prefer */
+  margin-bottom: 0px; 
   text-align: center;
-  /* Add any other styles you want for this container */
+ 
 }
 
 .mapLegend {
@@ -186,7 +186,7 @@
   width: 20px;
   height: 20px;
   margin-right: 2px;
-  border: 1px solid #000; /* Optional: adds a border around the color box */
+  border: 1px solid #000; 
 }
 
 .flaggedBinsContainer {

@@ -13,7 +13,7 @@ function DevicesContainer({ isAdmin, devices }) {
 
   const map_list_toggle = () => {
     if (view === "map") {
-      return <MapView devices={devices} />;
+      return <MapView devices={devices} mapWidth = "800px" mapHeight = "800px"/>;
     } else if (view === "list") {
       return <ListView devices={devices} />;
     } else {
@@ -49,7 +49,7 @@ const MapLegend = () => (
     <div className={styles.legendItem}>
       <span
         className={styles.legendColorBox}
-        style={{ backgroundColor: "orange" }}
+        style={{ backgroundColor: "purple" }}
       ></span>
       <span>Full bin + low battery</span>
     </div>
@@ -63,7 +63,7 @@ const MapLegend = () => (
     <div className={styles.legendItem}>
       <span
         className={styles.legendColorBox}
-        style={{ backgroundColor: "yellow" }}
+        style={{ backgroundColor: "orange" }}
       ></span>
       <span>Low battery</span>
     </div>
