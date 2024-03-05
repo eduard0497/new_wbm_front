@@ -47,20 +47,26 @@ function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    try {
-      socket.on("request_data", (data) => {
-        let tmpDevices = data;
-        tmpDevices.map((device) => {
+    const handleData = (data) => {
+      try {
+        let tmpDevices = data.map((device) => {
           let distanceInCM = device.level;
           let binHeight = device.bin_height;
           let trashHeight = binHeight - distanceInCM;
           device.level = parseInt((trashHeight * 100) / binHeight);
+          return device;
         });
         setdevices(tmpDevices);
-      });
-    } catch (error) {
-      setError(error);
-    }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    socket.on("request_data", handleData);
+
+    return () => {
+      socket.off("request_data", handleData);
+    };
   }, [socket]);
 
   useEffect(() => {
