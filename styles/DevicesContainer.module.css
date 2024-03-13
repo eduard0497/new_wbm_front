@@ -36,7 +36,7 @@
 }
 
 .view_toggle button.active {
-  background-color: #174d1a; 
+  background-color: #174d1a;
 }
 
 .list_container {
@@ -50,26 +50,25 @@
 
 .list_item {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   align-items: flex-start;
   background-color: #e9ebee;
-  color: #000000; 
+  color: #000000;
   padding: 20px;
   margin-bottom: 10px;
   width: 100%;
   max-width: 600px;
 
-  cursor: pointer; 
+  cursor: pointer;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease; 
+  transition: transform 0.3s ease;
 }
 
 .low_battery_icon,
 .full_bin_icon {
-  font-size: 24px; 
-
+  font-size: 24px;
 }
 
 .list_item p {
@@ -86,18 +85,18 @@
 
 .submenu {
   display: flex;
-  flex-direction: column; 
-  background-color: #e9ebee; 
+  flex-direction: column;
+  background-color: #e9ebee;
   padding: 10px;
-  margin-top: 10px; 
-  width: calc(100% - 20px); 
+  margin-top: 10px;
+  width: calc(100% - 20px);
 }
 
 .submenu_button {
-  background-color: #4caf50; 
-  color: rgb(255, 255, 255); 
+  background-color: #4caf50;
+  color: rgb(255, 255, 255);
   padding: 10px;
-  margin-bottom: 5px; 
+  margin-bottom: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -105,7 +104,7 @@
 }
 
 .submenu_button:hover {
-  background-color: #45a049; 
+  background-color: #45a049;
 }
 
 .infoWindow {
@@ -115,19 +114,18 @@
 }
 
 .infoWindow p {
-  color: #000000; 
- 
+  color: #000000;
 }
 .infoButton {
-  background-color: #4caf50; 
-  color: white; 
+  background-color: #4caf50;
+  color: white;
   padding: 5px 10px;
-  margin-top: 5px; 
+  margin-top: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 0.8rem; 
+  font-size: 0.8rem;
 }
 
 .infoButton:hover {
@@ -135,33 +133,29 @@
 }
 
 .icon {
-  font-size: 24px; 
-  margin-right: 8px; 
-
+  font-size: 24px;
+  margin-right: 8px;
 }
 
 .list_item_full {
-  border-left: 5px solid red; 
+  border-left: 5px solid red;
 }
 
 .list_item_ok {
-  border-left: 5px solid rgb(35, 194, 35); 
+  border-left: 5px solid rgb(35, 194, 35);
 }
 
 .list_item_low_battery {
-
   border-left: 5px solid orange;
 }
 
 .list_item_critical {
-
   border-left: 5px solid purple;
 }
 
 .register_button_container {
-  margin-bottom: 0px; 
+  margin-bottom: 0px;
   text-align: center;
- 
 }
 
 .mapLegend {
@@ -186,7 +180,7 @@
   width: 20px;
   height: 20px;
   margin-right: 2px;
-  border: 1px solid #000; 
+  border: 1px solid #000;
 }
 
 .flaggedBinsContainer {
@@ -255,4 +249,8 @@
 .unknown_devices_container_device > p {
   margin-bottom: 5px;
   color: black;
+}
+
+.devices_table > tbody > tr > td > input {
+  max-width: 70px;
 }
