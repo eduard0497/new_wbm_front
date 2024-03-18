@@ -1,30 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/Routes.module.css";
-import MapView from "../comps/DevicesTab/MapView";
+import styles1 from "../styles/DevicesContainer.module.css";
+import MapView from "./DevicesTab/MapView";
 
 function Routes() {
   const [devices, setDevices] = useState([]);
-  const [directions, setDirections] = useState(null);
-  const [travelMode, setTravelMode] = useState("WALKING");
-  const [estimatedTime, setEstimatedTime] = useState("");
-  const [activeRoute, setActiveRoute] = useState(null);
-  const [inProgressRoutes, setInProgressRoutes] = useState([]);
-  const [inProgressBins, setInProgressBins] = useState([]);
-  const [filters, setFilters] = useState({
-    changeBattery: true,
-    emptyBin: true,
-    location: "",
-  });
-  const [filteredBins, setFilteredBins] = useState([]);
-  const [workOrdersInProgress, setWorkOrdersInProgress] = useState({});
 
-  useEffect(() => {
-    if (devices.length === 0) {
-      fetchDevices();
-    }
-  }, []);
-
-  const fetchDevices = () => {
+  const getDevices = () => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
       method: "post",
       headers: { "Content-Type": "application/json" },
@@ -44,25 +26,15 @@ function Routes() {
   };
 
   useEffect(() => {
-    const filtered = devices.filter((device) => {
-      const isBatteryInProgress =
-        workOrdersInProgress[device.unique_id]?.includes("Change Battery");
-      const isFullInProgress =
-        workOrdersInProgress[device.unique_id]?.includes("Empty Bin");
+    getDevices();
+  }, []);
 
-      const needsBatteryChange = !isBatteryInProgress && device.battery < 25;
-      const needsEmptying = !isFullInProgress && device.level >= 80;
+  const [filters, setFilters] = useState({
+    changeBattery: true,
+    emptyBin: true,
+  });
 
-      return (
-        (filters.changeBattery && needsBatteryChange) ||
-        (filters.emptyBin && needsEmptying)
-      );
-    });
-
-    setFilteredBins(filtered);
-  }, [devices, filters, workOrdersInProgress]);
-
-  const handleChange = (e) => {
+  const handleFilterChange = (e) => {
     const { name, value, checked, type } = e.target;
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -70,115 +42,40 @@ function Routes() {
     }));
   };
 
-  const renderWorkOrders = (bin) => {
-    const workOrders = [];
+  const [travelMode, setTravelMode] = useState("WALKING");
+  const [estimatedTime, setEstimatedTime] = useState("");
+  const [directions, setDirections] = useState(null);
+  const [devicesToWorkOn, setDevicesToWorkOn] = useState(devices);
 
-    if (filters.emptyBin && bin.level >= 80) {
-      workOrders.push(
-        <div
-          key={`${bin.unique_id}-empty`}
-          className={`${styles.workOrder} ${styles.emptyBin}`}
-        >
-          Empty Bin
-        </div>
-      );
-    }
-
-    if (filters.changeBattery && bin.battery < 25) {
-      workOrders.push(
-        <div
-          key={`${bin.unique_id}-battery`}
-          className={`${styles.workOrder} ${styles.lowBattery}`}
-        >
-          Change Battery
-        </div>
-      );
-    }
-
-    return workOrders;
-  };
-
-  const startRoute = () => {
-    const newWorkOrdersInProgress = { ...workOrdersInProgress };
-    const binIds = [];
-    const workOrderTypes = new Set(); // To avoid duplicates
-
-    filteredBins.forEach((bin) => {
-      if (!newWorkOrdersInProgress[bin.unique_id]) {
-        newWorkOrdersInProgress[bin.unique_id] = [];
-      }
-      binIds.push(bin.unique_id); // Collect bin IDs
-
-      if (filters.changeBattery && bin.battery < 25) {
-        newWorkOrdersInProgress[bin.unique_id].push("Change Battery");
-        workOrderTypes.add("Change Battery");
-      }
-      if (filters.emptyBin && bin.level >= 80) {
-        newWorkOrdersInProgress[bin.unique_id].push("Empty Bin");
-        workOrderTypes.add("Empty Bin");
-      }
-    });
-
-    // Assuming you have a way to get the current employee's information
-    const currentEmployee = "EmployeeNameOrID"; // Placeholder for employee identification
-
-    const routeData = {
-      routeNumber: Math.max(0, ...inProgressRoutes) + 1,
-      employee: currentEmployee,
-      bin_ids: binIds,
-      workOrderTypes: Array.from(workOrderTypes),
-      start_time: new Date().toISOString(),
-      status: "in progress",
+  useEffect(() => {
+    const filterDevices = () => {
+      const filtered = devices.filter((device) => {
+        if (!filters.emptyBin && !filters.changeBattery) {
+          return false;
+        }
+        if (filters.emptyBin && !filters.changeBattery) {
+          return device.level >= 80 && device.battery >= 25;
+        }
+        if (!filters.emptyBin && filters.changeBattery) {
+          return device.level < 80 && device.battery < 25;
+        }
+        if (filters.emptyBin && filters.changeBattery) {
+          return true;
+        }
+      });
+      setDevicesToWorkOn(filtered);
     };
+    filterDevices();
+  }, [filters, devices]);
 
-    console.log("Route Data:", JSON.stringify(routeData, null, 2));
-
-    setWorkOrdersInProgress(newWorkOrdersInProgress);
-    setActiveRoute(null); // Reset active route
-    setInProgressBins((prevBins) => [
-      ...prevBins,
-      ...filteredBins.map((bin) => bin.unique_id),
-    ]);
-    // Add new route to in progress routes
-    const newRouteId = routeData.routeNumber; // Use the generated route number
-    setInProgressRoutes([...inProgressRoutes, newRouteId]);
-  };
-
-  const completeRoute = (routeId) => {
-    // Mark route as completed
-    setActiveRoute(null);
-    setInProgressRoutes(inProgressRoutes.filter((id) => id !== routeId));
-  };
-
-  // Function to render in-progress routes
-  const renderInProgressRoutes = () => {
-    return inProgressRoutes.map((routeId) => (
-      <div key={routeId} className={styles.inProgressRoute}>
-        <div>Route #{routeId}</div>
-        <button onClick={() => completeRoute(routeId)}>Complete Route</button>
-      </div>
-    ));
-  };
-
-  // Function to fetch directions
   const fetchDirections = () => {
-    // Check if the Google Maps API is loaded
-    if (
-      typeof window.google === "undefined" ||
-      typeof window.google.maps === "undefined"
-    ) {
-      console.error("Google Maps API is not loaded yet.");
-      setTimeout(fetchDirections, 1000);
-      return;
-    }
-    //Need at least two points for directions
-    if (filteredBins.length < 2) {
+    if (devicesToWorkOn.length < 2) {
       setDirections(null);
       setEstimatedTime("");
       return;
     }
 
-    const waypoints = filteredBins.slice(1, -1).map((bin) => ({
+    const waypoints = devicesToWorkOn.slice(1, -1).map((bin) => ({
       location: { lat: bin.lat, lng: bin.lng },
       stopover: true,
     }));
@@ -186,10 +83,10 @@ function Routes() {
     const directionsService = new window.google.maps.DirectionsService();
     directionsService.route(
       {
-        origin: { lat: filteredBins[0].lat, lng: filteredBins[0].lng },
+        origin: { lat: devicesToWorkOn[0].lat, lng: devicesToWorkOn[0].lng },
         destination: {
-          lat: filteredBins[filteredBins.length - 1].lat,
-          lng: filteredBins[filteredBins.length - 1].lng,
+          lat: devicesToWorkOn[devicesToWorkOn.length - 1].lat,
+          lng: devicesToWorkOn[devicesToWorkOn.length - 1].lng,
         },
         waypoints: waypoints,
         travelMode: travelMode,
@@ -210,8 +107,171 @@ function Routes() {
   };
 
   useEffect(() => {
-    fetchDirections();
-  }, [filteredBins, travelMode]);
+    if (
+      typeof window.google === "undefined" ||
+      typeof window.google.maps === "undefined"
+    ) {
+      console.error("Google Maps API is not loaded yet.");
+      return;
+    } else {
+      fetchDirections();
+    }
+  }, [devicesToWorkOn, travelMode, filters]);
+
+  const decideWorkToDo = (bin) => {
+    let emptyBin = false;
+    let changeBattery = false;
+
+    if (filters.emptyBin && bin.level >= 80) {
+      emptyBin = true;
+    }
+
+    if (filters.changeBattery && bin.battery < 25) {
+      changeBattery = true;
+    }
+
+    return {
+      emptyBin,
+      changeBattery,
+    };
+  };
+
+  const renderWorkToDo = () => {
+    if (!devicesToWorkOn.length) return;
+
+    return devicesToWorkOn.map((device) => {
+      return (
+        <div key={device.id} className={styles.binItem}>
+          <p>
+            <strong>Device ID:</strong> {device.unique_id}
+          </p>
+          <div key={device.id} className={styles.workOrder}>
+            {decideWorkToDo(device).emptyBin && (
+              <div
+                key={`${device.unique_id}-empty`}
+                className={`${styles.workOrder} ${styles.emptyBin}`}
+              >
+                Empty Bin
+              </div>
+            )}
+            {decideWorkToDo(device).changeBattery && (
+              <div
+                key={`${device.unique_id}-battery`}
+                className={`${styles.workOrder} ${styles.lowBattery}`}
+              >
+                Change Battery
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const createRoute = () => {
+    if (!devicesToWorkOn.length) return;
+
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/create-route`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        route: devicesToWorkOn,
+        whatToDo: filters,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          console.log(data.msg);
+          getRoutes();
+        }
+      });
+  };
+
+  const [allRoutes, setAllRoutes] = useState([]);
+
+  const getRoutes = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-routes`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          setAllRoutes(data.routes);
+        }
+      });
+  };
+
+  useEffect(() => {
+    getRoutes();
+  }, []);
+
+  const startRoute = (id) => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/start-route`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        id,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          console.log(data.msg);
+          getRoutes();
+        }
+      });
+  };
+
+  const finishRoute = (id) => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/finish-route`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        id,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          console.log(data.msg);
+          getRoutes();
+        }
+      });
+  };
+
+  const deleteRoute = (id) => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/delete-route`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        id,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          console.log(data.msg);
+          getRoutes();
+        }
+      });
+  };
 
   return (
     <div className={styles.routesContainer}>
@@ -225,7 +285,7 @@ function Routes() {
               type="checkbox"
               name="changeBattery"
               checked={filters.changeBattery}
-              onChange={handleChange}
+              onChange={handleFilterChange}
             />
             Change Battery
           </label>
@@ -234,7 +294,7 @@ function Routes() {
               type="checkbox"
               name="emptyBin"
               checked={filters.emptyBin}
-              onChange={handleChange}
+              onChange={handleFilterChange}
             />
             Empty Bin
           </label>
@@ -253,9 +313,9 @@ function Routes() {
             </div>
           </div>
           <button
-            onClick={() => startRoute(1)}
+            onClick={createRoute}
             className={styles.startRouteButton}
-            disabled={activeRoute === 1}
+            // disabled={activeRoute === 1}
           >
             Start Route
           </button>
@@ -263,7 +323,7 @@ function Routes() {
 
         <div className={styles.contentContainer}>
           <MapView
-            devices={filteredBins}
+            devices={devicesToWorkOn}
             mapWidth="600px"
             mapHeight="400px"
             directions={directions}
@@ -271,34 +331,71 @@ function Routes() {
           <div className={styles.routeSummaryAndControls}>
             <div className={styles.routeSummary}>
               <h3>Route Summary</h3>
-              <p>Total Bins: {filteredBins.length}</p>
-
-              <div className={styles.binsDetails}>
-                {filteredBins.map((bin) => {
-                  const workOrders = renderWorkOrders(bin);
-                  return (
-                    <div key={bin.id} className={styles.binItem}>
-                      <p>
-                        <strong>Device ID:</strong> {bin.unique_id}
-                      </p>
-                      {workOrders.map((order) => (
-                        <p key={order.key} className={styles.workOrder}>
-                          {order}
-                        </p>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
+              <p>Total Bins: {devices.length}</p>
+              {renderWorkToDo()}
             </div>
           </div>
         </div>
       </div>
 
-      <div className={styles.inProgressContainer}>
-        <h2>In Progress</h2>
-        {renderInProgressRoutes()}
-      </div>
+      <table className={styles1.devices_table}>
+        <thead>
+          <tr>
+            <th>Route ID</th>
+            <th>Created By</th>
+            <th>Bin Id's</th>
+            <th>Status</th>
+            <th>Created at</th>
+            <th>Started</th>
+            <th>Finished</th>
+            <th>Controls</th>
+          </tr>
+        </thead>
+        <tbody>
+          {allRoutes.map((route) => {
+            return (
+              <tr key={route.id} className={styles.inProgressRoute}>
+                <td>{route.id}</td>
+                <td>{route.fname + " " + route.lname}</td>
+                <td>{route.deviceids.map((deviceid) => deviceid + " ")}</td>
+                <td>{route.status}</td>
+                <td>{new Date(route.timestamp).toLocaleString()}</td>
+                <td>
+                  {route.started !== null
+                    ? new Date(route.started).toLocaleString()
+                    : null}
+                </td>
+                <td>
+                  {route.finished !== null
+                    ? new Date(route.finished).toLocaleString()
+                    : null}
+                </td>
+                <td>
+                  {route.status === "pending" ? (
+                    <button
+                      onClick={() => {
+                        startRoute(route.id);
+                      }}
+                    >
+                      Start
+                    </button>
+                  ) : null}
+                  {route.status === "started" ? (
+                    <button onClick={() => finishRoute(route.id)}>
+                      Complete
+                    </button>
+                  ) : null}
+                  {route.status === "finished" ? (
+                    <button onClick={() => deleteRoute(route.id)}>
+                      Delete
+                    </button>
+                  ) : null}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

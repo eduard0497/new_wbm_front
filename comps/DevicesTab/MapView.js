@@ -5,19 +5,19 @@ import {
   GoogleMap,
   MarkerF,
   InfoWindowF,
-  DirectionsRenderer
+  DirectionsRenderer,
 } from "@react-google-maps/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBatteryQuarter, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-
 //Moved some map options outside functions to keep from refreshing to default every few seconds if changed by user
-const mapCenter = { lat: 34.242245312686954, lng: -118.53043313617162 }; 
+const mapCenter = { lat: 34.242245312686954, lng: -118.53043313617162 };
 const mapOptions = {
-  mapTypeId: 'satellite',
+  mapTypeId: "satellite",
   clickableIcons: true,
   scrollwheel: true,
 };
+const libraries = ["places"];
 
 function MapView({ devices, mapWidth, mapHeight, directions }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -26,8 +26,6 @@ function MapView({ devices, mapWidth, mapHeight, directions }) {
   };
   const zoomDistance = 16;
 
-
-  const libraries = ["places"];
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY,
     libraries: libraries,
@@ -88,7 +86,7 @@ function MapView({ devices, mapWidth, mapHeight, directions }) {
         zoom={zoomDistance}
         center={mapCenter}
         mapContainerStyle={{ width: mapWidth, height: mapHeight }}
-        key={directions ? 'with-directions' : 'no-directions'}
+        key={directions ? "with-directions" : "no-directions"}
       >
         {directions && <DirectionsRenderer directions={directions} />}
         {devices.map((device) => {
