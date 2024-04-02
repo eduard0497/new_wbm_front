@@ -1,103 +1,101 @@
 /* Data.module.css */
 
 .analytics_container {
-    max-width: 1000px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #ffffff; /* Switch to a clean white background */
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Softer shadow */
-    color: #333333; /* Slightly darker font color for contrast */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
-  }
-  
-  .date_range_selector {
-    display: flex;
-    justify-content: space-between; /* Adjusted for better spacing */
-    align-items: center;
-    padding: 0 20px; /* Align with the padding of the container */
-    margin-bottom: 40px; /* More whitespace */
-  }
-  
-  .date_range_selector input[type="date"] {
-    border: 1px solid #cccccc; /* Subtle border */
-    border-radius: 4px;
-    padding: 10px;
-    font-size: 16px; /* Larger font size for better readability */
-  }
-  
-  .date_range_selector button {
-    background-color: #4CAF50; /* Accent color for buttons */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .date_range_selector button:hover {
-    background-color: #45a049; /* Darken button on hover */
-  }
-  
-  .chart_container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin-bottom: 40px; /* More whitespace */
-  }
-  
-  .chart {
-    background-color: #f8f8f8; /* Slightly off-white backgrounds for charts */
-    border-radius: 10px;
-    padding: 30px; /* Increased padding for a more open feel */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Lighter shadow for depth */
-  }
-  
-  .insights_container {
-    background-color: #f8f8f8;
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    margin-top: 20px;
-    display: flex; /* Changed from grid to flex for vertical layout */
-    flex-direction: column; /* Arrange children in a column */
-  }
-  
-  .insights_heading {
-    grid-column: 1 / -1; /* Full width */
-    font-size: 1.5em;
-    margin-bottom: 15px;
-  }
-  
-  .insight {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px; /* Add space between cards */
-  }
-  
-  .insight h3 {
-    color: #333;
-    margin-bottom: 15px;
-  }
-  
-  .insight div {
-    margin-bottom: 15px; /* Space between summary and suggestions */
-  }
-  
-  .insight ul {
-    list-style-type: disc; /* Bullet points for list */
-    padding-left: 20px; /* Indent for bullet points */
-    margin-top: 5px;
-    margin-bottom: 5px;
-  }
-  
-  .insight p {
-    margin: 0;
+  max-width: 1000px;
+  margin: 5px auto;
+  padding: 10px;
+  background-color: #ffffff; /* Switch to a clean white background */
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Softer shadow */
+  color: #333333; /* Slightly darker font color for contrast */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+}
 
-    color: black;
-  }
-  
+.date_range_selector {
+  display: flex;
+  justify-content: space-between; /* Adjusted for better spacing */
+  align-items: center;
+  padding: 0 20px; /* Align with the padding of the container */
+  margin-bottom: 40px; /* More whitespace */
+}
+
+.date_range_selector input[type="date"] {
+  border: 1px solid #cccccc; /* Subtle border */
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 16px; /* Larger font size for better readability */
+}
+
+.date_range_selector button {
+  background-color: #4caf50; /* Accent color for buttons */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.date_range_selector button:hover {
+  background-color: #45a049; /* Darken button on hover */
+}
+
+.chart_container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.chart {
+  background-color: #e9e9e9; /* Slightly off-white backgrounds for charts */
+  border-radius: 10px;
+  padding: 30px; /* Increased padding for a more open feel */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Lighter shadow for depth */
+}
+
+.insights_container {
+  background-color: #f8f8f8;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+  display: flex; /* Changed from grid to flex for vertical layout */
+  flex-direction: column; /* Arrange children in a column */
+}
+
+.insights_heading {
+  grid-column: 1 / -1; /* Full width */
+  font-size: 1.5em;
+  margin-bottom: 15px;
+}
+
+.insight {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px; /* Add space between cards */
+}
+
+.insight h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.insight div {
+  margin-bottom: 15px; /* Space between summary and suggestions */
+}
+
+.insight ul {
+  list-style-type: disc; /* Bullet points for list */
+  padding-left: 20px; /* Indent for bullet points */
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.insight p {
+  margin: 0;
+
+  color: black;
+}
