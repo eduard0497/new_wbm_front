@@ -2,10 +2,25 @@ import React, { useState, useEffect } from "react";
 import styles from "../styles/Routes.module.css";
 import styles1 from "../styles/DevicesContainer.module.css";
 import MapView from "./DevicesTab/MapView";
+import { predictedDevices } from '../utils/binPredictions';
 
 function Routes() {
   const [devices, setDevices] = useState([]);
-
+  const predictedDeviceIds = new Set(predictedDevices.map(device => device.unique_id)); //add to ensure on empty bin route
+  
+  //merge predicted bins
+  const mergeAndSetDevices = (filteredDevices) => {
+    // Create a Set of unique_id values from filteredDevices for fast lookup
+    const filteredIds = new Set(filteredDevices.map(device => device.unique_id));
+  
+    // Filter out predictedDevices that are already in filteredDevices by unique_id
+    const uniquePredictedDevices = predictedDevices.filter(device => !filteredIds.has(device.unique_id));
+  
+    // Combine filteredDevices with the unique predictedDevices
+    const combinedDevices = [...filteredDevices, ...uniquePredictedDevices];
+  
+    setDevices(combinedDevices);
+  };
   const getDevices = () => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
       method: "post",
@@ -19,7 +34,7 @@ function Routes() {
         } else {
           const allDevices = helperToConvertLevelToPercentage(data.devices);
           const filteredDevices = pickDevicesWithIssues(allDevices);
-          setDevices(filteredDevices);
+          mergeAndSetDevices(filteredDevices); //added for predicted bins
         }
       })
       .catch((e) => console.log(e));
@@ -50,18 +65,13 @@ function Routes() {
   useEffect(() => {
     const filterDevices = () => {
       const filtered = devices.filter((device) => {
-        if (!filters.emptyBin && !filters.changeBattery) {
-          return false;
-        }
-        if (filters.emptyBin && !filters.changeBattery) {
-          return device.level >= 80 && device.battery >= 25;
-        }
-        if (!filters.emptyBin && filters.changeBattery) {
-          return device.level < 80 && device.battery < 25;
-        }
-        if (filters.emptyBin && filters.changeBattery) {
-          return true;
-        }
+        const needsBatteryChange = device.battery < 25;
+        const needsEmptying = device.level >= 80;
+        
+        return (
+          (filters.changeBattery && needsBatteryChange) ||
+          (filters.emptyBin && needsEmptying || predictedDeviceIds.has(device.unique_id))
+        );
       });
       setDevicesToWorkOn(filtered);
     };
