@@ -173,14 +173,14 @@ function Data() {
       {/*  */}
       <div className={styles.chart_container}>
         <div className={styles.chart}>
-          <h2>Most Frequently Filled Bins</h2>
-        </div>
-
-        <div className={styles.chart}>
           <h2>Average Fill Levels Over Time</h2>
           {!allHistorical.length ? null : (
             <LineChartComponent data={allHistorical} />
           )}
+        </div>
+
+        <div className={styles.chart}>
+          <h2>Most Frequently Filled Bins</h2>
         </div>
       </div>
 
