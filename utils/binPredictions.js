@@ -1,3 +1,9 @@
+const THRESHOLD_IN_HOURS = 6;
+const MAX_FILL_PERCENT = 75;
+const LOW_FILL_RATE_LIMIT = 0.50;
+
+
+
   const mock_devices = [
     {
       unique_id: 1,
@@ -31,9 +37,9 @@
 
  const exampleCurrentFillLevels = {
     1: 50,
-    2: 23,
-    3: 60,
-    4: 23,
+    2: 65,
+    3: 70,
+    4: 68,
 };
 
 // Example predictions object to simplify demo of fill rate prediction:
@@ -44,27 +50,29 @@
     4: "2024-04-05T08:00:00Z",
 };
 
-const thresholdInHours = 17;
 
-const fullThreshold = 75
 
 //dynamically set example bins data
-function generateDynamicBinsData(startLevel = 10, incrementPerEntry = 5, totalEntries = 10, intervalHours = 3) {
+// Dynamically set example bins data
+function generateDynamicBinsData(startLevel = 10, normalIncrementPerEntry = 5, lowIncrementPerEntry = 0.1, totalEntries = 10, intervalHours = 3) {
     const binsData = {};
     let startTimestamp = new Date(); // Start from the current date and time
 
     // For demonstration, let's adjust the startTimestamp to the beginning of today for clarity
-    startTimestamp.setDate(startTimestamp.getDate() - 1); //start one day ago
+    startTimestamp.setDate(startTimestamp.getDate() - 1); // Start one day ago
     startTimestamp.setHours(0, 0, 0, 0);
 
     // Assuming you have 4 bins as in your mock_devices
     for (let binId = 1; binId <= 4; binId++) {
         const entries = [];
         let currentLevel = startLevel;
+        // Use a low increment for one bin (e.g., bin 4) and normal increment for others
+        let incrementPerEntry = binId === 4 ? lowIncrementPerEntry : normalIncrementPerEntry;
+
         for (let i = 0; i < totalEntries; i++) {
-        const timestamp = new Date(startTimestamp.getTime() + i * intervalHours * 60 * 60 * 1000);
-        entries.push({ timestamp: timestamp.toISOString(), level: currentLevel });
-        currentLevel += incrementPerEntry; // Increment the level for each entry
+            const timestamp = new Date(startTimestamp.getTime() + i * intervalHours * 60 * 60 * 1000);
+            entries.push({ timestamp: timestamp.toISOString(), level: currentLevel });
+            currentLevel += incrementPerEntry; // Increment the level for each entry
         }
         binsData[binId] = entries;
     }
@@ -72,6 +80,7 @@ function generateDynamicBinsData(startLevel = 10, incrementPerEntry = 5, totalEn
 }
 
 const exampleBinsData = generateDynamicBinsData();
+
 //console.log(exampleBinsData); // Debugging log
 
 
@@ -104,6 +113,21 @@ function getFillRates(binsData) {
 }
 
 
+function checkForLowFillRates(fillRates) {
+    const binsToReturn = [];
+    for (let binId in fillRates) {
+      let fillRate = parseFloat(fillRates[binId]);
+      if (fillRate <= LOW_FILL_RATE_LIMIT) {
+        const lowFillRateDevice = mock_devices.find(device => device.unique_id === parseInt(binId, 10));
+
+        if (lowFillRateDevice) {
+            binsToReturn.push(lowFillRateDevice);
+        }
+      }
+    }
+    return binsToReturn;
+  }
+
 
 function getLastPingTimes(binsData) {
     let lastPingTimes = {};
@@ -128,7 +152,7 @@ function hoursToFull(binsData, fillRates, currentFillLevels) {
             continue;
         }
 
-        const hoursToFull = (fullThreshold - currentFillLevel) / fillRate;
+        const hoursToFull = (MAX_FILL_PERCENT - currentFillLevel) / fillRate;
         if (hoursToFull < 0) {
             hoursToFullResults[binId] = "Bin is already above the fullness threshold.";
             continue;
@@ -156,7 +180,7 @@ function predictTimestamp(binsData, hoursToFullResults) {
 
 
 
-function binsForPickup(predictions, thresholdInHours, mock_devices) {
+function binsForPickup(predictions, THRESHOLD_IN_HOURS, mock_devices) {
     const currentTime = new Date();
     let binsToPickup = [];
 
@@ -171,8 +195,8 @@ function binsForPickup(predictions, thresholdInHours, mock_devices) {
         //console.log("predictedFullTime: ", predictedFullTime, "Current Time: ", currentTime); // Debugging log
         //console.log(`Time diff for bin ${binId}: ${timeDiff}`); // Debugging log
 
-        if (timeDiff <= thresholdInHours) {
-            //console.log("DOING THIS: ", binId, ". Because: ", timeDiff, "less than or equal to: ", thresholdInHours); // Debugging log
+        if (timeDiff <= THRESHOLD_IN_HOURS) {
+            //console.log("DOING THIS: ", binId, ". Because: ", timeDiff, "less than or equal to: ", THRESHOLD_IN_HOURS); // Debugging log
             const deviceToPickup = mock_devices.find(device => device.unique_id === parseInt(binId, 10));
 
             if (deviceToPickup) {
@@ -180,7 +204,7 @@ function binsForPickup(predictions, thresholdInHours, mock_devices) {
             }
         }
         else{
-            //console.log("**NOT DOING THIS: ", binId, ". Because: ", timeDiff, "is greater than: ", thresholdInHours); // Debugging log
+            //console.log("**NOT DOING THIS: ", binId, ". Because: ", timeDiff, "is greater than: ", THRESHOLD_IN_HOURS); // Debugging log
         }
             
 
@@ -193,12 +217,14 @@ function binsForPickup(predictions, thresholdInHours, mock_devices) {
 
 
 const fillRates = getFillRates(exampleBinsData);
+export const lowFillRateBins = checkForLowFillRates(fillRates);
 const lastPingTimes = getLastPingTimes(exampleBinsData);
 const numHours = hoursToFull(exampleBinsData, fillRates, exampleCurrentFillLevels);
 const predictedTimes = predictTimestamp(exampleBinsData, numHours);
-export const predictedDevices = binsForPickup(predictedTimes, thresholdInHours, mock_devices);
+export const predictedDevices = binsForPickup(predictedTimes, THRESHOLD_IN_HOURS, mock_devices);
 
 //console.log("Fill Rates: ", fillRates); // Debugging log
+//console.log("Bins with low fill rates: ", lowFillRateBins); // Debugging log
 //console.log("Last Ping: ", lastPingTimes); // Debugging log
 //console.log("Hours until full: ", numHours); // Debugging log
 //console.log("Predicted Time for pick-up: ", predictedTimes); // Debugging log
