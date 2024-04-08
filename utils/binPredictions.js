@@ -164,7 +164,10 @@ function binsForPickup(predictions, THRESHOLD_IN_HOURS, mock_devices) {
         //console.log(`Prediction for bin ${binId}: ${prediction}`); // Debugging log
 
         const predictedFullTime = new Date(prediction);
-        predictedFullTime.setHours(predictedFullTime.getHours() + 7); // change if we switch to DB and doesn't need manual adjustment
+        const adjust = predictedFullTime.getTimezoneOffset() / 60; //timezone adjustment dynamically. '/ 60' to convert minutes returned to hours
+        //console.log(predictedFullTime.getTimezoneOffset() / 60); // Debugging log
+        predictedFullTime.setHours(predictedFullTime.getHours() + adjust); // dumb af to have to do this. change if we switch to DB and doesn't need manual adjustment
+
         const timeDiff = (predictedFullTime - currentTime) / (1000 * 60 * 60);
         //console.log("predictedFullTime: ", predictedFullTime, "Current Time: ", currentTime); // Debugging log
         //console.log(`Time diff for bin ${binId}: ${timeDiff}`); // Debugging log
@@ -208,7 +211,7 @@ export const predictedDevices = binsForPickup(predictedTimes, THRESHOLD_IN_HOURS
 //console.log("Hours until full: ", numHours); // Debugging log
 //console.log("Predicted Time for pick-up: ", predictedTimes); // Debugging log
 //console.log("These bins will be picked up: ", predictedDevices); // Debugging log
-
+//console.log("Low fill rate bins: ", lowFillRateBins);
 
 
 

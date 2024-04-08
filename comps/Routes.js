@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import styles from "../styles/Routes.module.css";
 import styles1 from "../styles/DevicesContainer.module.css";
 import MapView from "./DevicesTab/MapView";
-import { predictedDevices } from '../utils/binPredictions';
+import { predictedDevices, lowFillRateBins } from '../utils/binPredictions';
 
 function Routes() {
   const [devices, setDevices] = useState([]);
   const predictedDeviceIds = new Set(predictedDevices.map(device => device.unique_id)); //add to ensure on empty bin route
-  
+  console.log("Predicted bins: ", predictedDevices, "Low fill bins: ", lowFillRateBins);
   //merge predicted bins
   const mergeAndSetDevices = (filteredDevices) => {
     // Create a Set of unique_id values from filteredDevices for fast lookup
