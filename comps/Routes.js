@@ -2,25 +2,62 @@ import React, { useState, useEffect } from "react";
 import styles from "../styles/Routes.module.css";
 import styles1 from "../styles/DevicesContainer.module.css";
 import MapView from "./DevicesTab/MapView";
-import { predictedDevices, lowFillRateBins } from '../utils/binPredictions';
+import {
+  getFillRates,
+  checkForLowFillRates,
+  getLastPingTimes,
+  hoursToFull,
+  predictTimestamp,
+  binsForPickup,
+} from "../utils/binPredictions";
 
 function Routes() {
   const [devices, setDevices] = useState([]);
-  const predictedDeviceIds = new Set(predictedDevices.map(device => device.unique_id)); //add to ensure on empty bin route
-  console.log("Predicted bins: ", predictedDevices, "Low fill bins: ", lowFillRateBins);
-  //merge predicted bins
-  const mergeAndSetDevices = (filteredDevices) => {
-    // Create a Set of unique_id values from filteredDevices for fast lookup
-    const filteredIds = new Set(filteredDevices.map(device => device.unique_id));
-  
-    // Filter out predictedDevices that are already in filteredDevices by unique_id
-    const uniquePredictedDevices = predictedDevices.filter(device => !filteredIds.has(device.unique_id));
-  
-    // Combine filteredDevices with the unique predictedDevices
-    const combinedDevices = [...filteredDevices, ...uniquePredictedDevices];
-  
-    setDevices(combinedDevices);
+
+  //
+  const getCurrentLevels = (devices) => {
+    let tempObject = {};
+    devices.map((device) => {
+      tempObject[device.unique_id] = device.level;
+    });
+    return tempObject;
   };
+
+  // let fillRates;
+  // let lowFillRateBins;
+  // let lastPingTimes;
+  // let currentFillLevels;
+  // let numHours;
+  // let predictedTimes;
+  // let predictedDevices;
+
+  // fillRates = getFillRates(allDevices);
+  // console.log(fillRates);
+  // lowFillRateBins = checkForLowFillRates(fillRates);
+  // lastPingTimes = getLastPingTimes(allDevices);
+  // currentFillLevels = getCurrentLevels(allDevices);
+  // numHours = hoursToFull(allDevices, fillRates, currentFillLevels);
+  // predictedTimes = predictTimestamp(allDevices, numHours);
+  // predictedDevices = binsForPickup(predictedTimes, 6, allDevices);
+
+  //merge predicted bins
+  // const mergeAndSetDevices = (filteredDevices) => {
+  //   // Create a Set of unique_id values from filteredDevices for fast lookup
+  //   const filteredIds = new Set(
+  //     filteredDevices.map((device) => device.unique_id)
+  //   );
+
+  //   // Filter out predictedDevices that are already in filteredDevices by unique_id
+  //   const uniquePredictedDevices = predictedDevices.filter(
+  //     (device) => !filteredIds.has(device.unique_id)
+  //   );
+
+  //   // Combine filteredDevices with the unique predictedDevices
+  //   const combinedDevices = [...filteredDevices, ...uniquePredictedDevices];
+
+  //   setDevices(combinedDevices);
+  // };
+
   const getDevices = () => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
       method: "post",
@@ -34,7 +71,25 @@ function Routes() {
         } else {
           const allDevices = helperToConvertLevelToPercentage(data.devices);
           const filteredDevices = pickDevicesWithIssues(allDevices);
-          mergeAndSetDevices(filteredDevices); //added for predicted bins
+          setDevices(filteredDevices);
+          // mergeAndSetDevices(filteredDevices); //added for predicted bins
+        }
+      })
+      .catch((e) => console.log(e));
+  };
+
+  const getDevicesHistorical = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-historical-for-routes`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.status) {
+          console.log(data.msg);
+        } else {
+          console.log(data.data);
         }
       })
       .catch((e) => console.log(e));
@@ -42,6 +97,7 @@ function Routes() {
 
   useEffect(() => {
     getDevices();
+    getDevicesHistorical();
   }, []);
 
   const [filters, setFilters] = useState({
@@ -67,10 +123,11 @@ function Routes() {
       const filtered = devices.filter((device) => {
         const needsBatteryChange = device.battery < 25;
         const needsEmptying = device.level >= 80;
-        
+
         return (
           (filters.changeBattery && needsBatteryChange) ||
-          (filters.emptyBin && needsEmptying || predictedDeviceIds.has(device.unique_id))
+          (filters.emptyBin && needsEmptying) ||
+          predictedDeviceIds.has(device.unique_id)
         );
       });
       setDevicesToWorkOn(filtered);
