@@ -19,6 +19,7 @@ function MockData() {
         <thead>
           <tr>
             <th>ID</th>
+            <th>EUI</th>
             <th>Unique ID</th>
             <th>Bin Height</th>
             <th>Level - measuered distance</th>
@@ -46,9 +47,9 @@ export default MockData;
 
 const TableRow = ({ device, getDevices }) => {
   const [toggle, setToggle] = useState(false);
-
   //
   const [unique_id, setunique_id] = useState(device.unique_id);
+  const [eui, seteui] = useState(device.eui);
   const [bin_height, setbin_height] = useState(device.bin_height);
   const [level, setlevel] = useState(device.level);
   const [battery, setbattery] = useState(device.battery);
@@ -90,6 +91,7 @@ const TableRow = ({ device, getDevices }) => {
       {!toggle ? (
         <tr>
           <td>{device.id}</td>
+          <td>{device.eui}</td>
           <td>{device.unique_id}</td>
           <td>{device.bin_height}</td>
           <td>{device.level}</td>
@@ -111,6 +113,13 @@ const TableRow = ({ device, getDevices }) => {
               type="text"
               value={unique_id}
               onChange={(e) => setunique_id(parseInt(e.target.value))}
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              value={eui}
+              onChange={(e) => seteui(parseInt(e.target.value))}
             />
           </td>
           <td>
@@ -178,6 +187,7 @@ const TableRow = ({ device, getDevices }) => {
 
 const RowToAddDevice = ({ getDevices }) => {
   const [unique_id, setunique_id] = useState("");
+  const [eui, seteui] = useState("");
   const [bin_height, setbin_height] = useState("");
   const [level, setlevel] = useState("");
   const [battery, setbattery] = useState("");
@@ -203,6 +213,7 @@ const RowToAddDevice = ({ getDevices }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         unique_id,
+        eui,
         bin_height,
         level,
         battery,
@@ -218,6 +229,7 @@ const RowToAddDevice = ({ getDevices }) => {
           console.log(data.msg);
         } else {
           setunique_id("");
+          seteui("");
           setbin_height("");
           setlevel("");
           setbattery("");
@@ -239,6 +251,13 @@ const RowToAddDevice = ({ getDevices }) => {
           type="text"
           value={unique_id}
           onChange={(e) => setunique_id(parseInt(e.target.value))}
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          value={eui}
+          onChange={(e) => seteui(parseInt(e.target.value))}
         />
       </td>
       <td>
