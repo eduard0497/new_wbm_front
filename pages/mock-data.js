@@ -112,15 +112,15 @@ const TableRow = ({ device, getDevices }) => {
           <td>
             <input
               type="text"
-              value={unique_id}
-              onChange={(e) => setunique_id(parseInt(e.target.value))}
+              value={eui}
+              onChange={(e) => seteui(parseInt(e.target.value))}
             />
           </td>
           <td>
             <input
               type="text"
-              value={eui}
-              onChange={(e) => seteui(parseInt(e.target.value))}
+              value={unique_id}
+              onChange={(e) => setunique_id(parseInt(e.target.value))}
             />
           </td>
           <td>
