@@ -66,6 +66,7 @@ const TableRow = ({ device, getDevices }) => {
       body: JSON.stringify({
         id,
         unique_id,
+        eui,
         bin_height,
         level,
         battery,
@@ -199,6 +200,7 @@ const RowToAddDevice = ({ getDevices }) => {
   const addDevice = () => {
     if (
       !unique_id ||
+      !eui ||
       !bin_height ||
       !level ||
       !battery ||
