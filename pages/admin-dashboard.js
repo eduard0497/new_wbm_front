@@ -62,10 +62,23 @@ function AdminDashboard() {
       }
     };
 
+    const handleNewPing = (device) => {
+      let distanceInCM = device.level;
+      let binHeight = device.bin_height;
+      let trashHeight = binHeight - distanceInCM;
+      device.level = parseInt((trashHeight * 100) / binHeight);
+      let devicesCopy = [...devices];
+      const index = devicesCopy.findIndex((obj) => obj["id"] === device["id"]);
+      devicesCopy[index] = device;
+      setdevices(devicesCopy);
+    };
+
     socket.on("request_data", handleData);
+    socket.on("new_ping", handleNewPing);
 
     return () => {
       socket.off("request_data", handleData);
+      socket.off("new_ping", handleNewPing);
     };
   }, [socket]);
 
