@@ -3,16 +3,16 @@ import styles from "../styles/Routes.module.css";
 import styles1 from "../styles/DevicesContainer.module.css";
 import MapView from "./DevicesTab/MapView";
 import {
-  getFillRates,
-  checkForLowFillRates,
-  getLastPingTimes,
-  hoursToFull,
-  predictTimestamp,
-  binsForPickup,
+  calculateFillRate,
+  estimateHoursUntilFull,
+  predictFullTime,
+  binsDueForPickup,
+  findLowFillRateBins
 } from "../utils/binPredictions";
 
 function Routes() {
   const [devices, setDevices] = useState([]);
+  const [historical, setHistorical] = useState([])
 
   //
   const getCurrentLevels = (devices) => {
@@ -23,16 +23,27 @@ function Routes() {
     return tempObject;
   };
 
-  // let fillRates;
-  // let lowFillRateBins;
-  // let lastPingTimes;
-  // let currentFillLevels;
-  // let numHours;
-  // let predictedTimes;
-  // let predictedDevices;
+  let fillRates;
+  let numHours;
+  let predictedTimes;
+  let predictedDevices;
+  let lowFillRateBins;
+  if(historical.length > 0) {
+   // console.log("Historical data: ", historical);
+    fillRates = calculateFillRate(historical);
+   // console.log("Fill rates: ", fillRates);
+    numHours = estimateHoursUntilFull(historical, fillRates);
+    //console.log("Num hours: ", numHours);
+    predictedTimes = predictFullTime(historical, numHours);
+    //console.log("Predicted tiemstamp: ", predictedTimes);
+    predictedDevices = binsDueForPickup(predictedTimes, 6);
+    console.log("Predicted bins: ", predictedDevices);
+    
+    lowFillRateBins = findLowFillRateBins(fillRates);
+    //console.log("Low fill rate: ", lowFillRateBins);
+    
+  }
 
-  // fillRates = getFillRates(allDevices);
-  // console.log(fillRates);
   // lowFillRateBins = checkForLowFillRates(fillRates);
   // lastPingTimes = getLastPingTimes(allDevices);
   // currentFillLevels = getCurrentLevels(allDevices);
@@ -89,7 +100,7 @@ function Routes() {
         if (!data.status) {
           console.log(data.msg);
         } else {
-          console.log(data.data);
+          setHistorical(data.data);
         }
       })
       .catch((e) => console.log(e));

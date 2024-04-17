@@ -68,7 +68,7 @@ function AdminDashboard() {
       let trashHeight = binHeight - distanceInCM;
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
-      const index = devicesCopy.findIndex((obj) => obj["id"] === device["id"]);
+      const index = devicesCopy.findIndex((obj) => obj.id === device.id);
       devicesCopy[index] = device;
       setdevices(devicesCopy);
     };
@@ -80,7 +80,7 @@ function AdminDashboard() {
       socket.off("request_data", handleData);
       socket.off("new_ping", handleNewPing);
     };
-  }, [socket]);
+  }, [socket, devices]);
 
   useEffect(() => {
     if (currentScreen === "") {
