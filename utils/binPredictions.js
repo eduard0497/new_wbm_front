@@ -40,192 +40,217 @@ const exampleCurrentFillLevels = {
   4: 68,
 };
 
-function generateDynamicBinsData(
-  startLevel = 10,
-  normalIncrementPerEntry = 5,
-  lowIncrementPerEntry = 0.1,
-  totalEntries = 10,
-  intervalHours = 3
-) {
-  const binsData = {};
-  let startTimestamp = new Date();
 
-  startTimestamp.setDate(startTimestamp.getDate() - 1); // Start one day ago
-  startTimestamp.setHours(0, 0, 0, 0);
+function generateDynamicMockBins() {
+  const currentDateTime = new Date(); // Current time
+  const startDateTime = new Date(currentDateTime.getTime() - 24 * 3600000); // Start from 24 hours ago
+  const mockBinsData = [];
+  
+  // Define the unique IDs and their fill rates and start levels
+  // Adjusting bin fill rates to ensure one bin fills within the threshold period
+  const binSpecifications = [
+      { uniqueId: 56, fillRate: 1, startLevel: 9, hours: 6 },
+      { uniqueId: 57, fillRate: 2, startLevel: 8, hours: 6 },
+      { uniqueId: 58, fillRate: 9, startLevel: 10, hours: 6 },  // Modified to fill rapidly
+      { uniqueId: 59, fillRate: 0.1, startLevel: 6, hours: 6 },  // Low fill rate example
+  ];
 
-  for (let binId = 1; binId <= 4; binId++) {
-    const entries = [];
-    let currentLevel = startLevel;
-    // Use a low increment for one bin (to test for low fill rate function) and normal increment for others
-    let incrementPerEntry =
-      binId === 4 ? lowIncrementPerEntry : normalIncrementPerEntry;
+  binSpecifications.forEach(spec => {
+      for (let i = 0; i <= spec.hours; i++) {
+          let date = new Date(startDateTime.getTime() + i * 3600000); // Increment by 1 hour from 24 hours ago
+          let level = spec.startLevel + i * spec.fillRate;
+          level = Math.min(level, 75);  // Cap fill level at 75% if exceeded to simulate max capacity
+          mockBinsData.push({
+              id: mockBinsData.length + 1,
+              unique_id: spec.uniqueId,
+              level_in_percents: level,
+              saved_time: date.toISOString()
+          });
+      }
+  });
 
-    for (let i = 0; i < totalEntries; i++) {
-      const timestamp = new Date(
-        startTimestamp.getTime() + i * intervalHours * 60 * 60 * 1000
-      );
-      entries.push({ timestamp: timestamp.toISOString(), level: currentLevel });
-      currentLevel += incrementPerEntry; // Increment the level for each entry
-    }
-    binsData[binId] = entries;
-  }
-  return binsData;
+  return mockBinsData;
 }
 
-export function getFillRates(allDevices) {
-  let fillRates = {};
 
-  for (let binId in allDevices) {
-    let binData = allDevices[binId];
-    let totalFillIncrease = 0;
-    let totalTimeInHours = 0;
 
-    for (let i = 0; i < binData.length - 1; i++) {
-      let start = binData[i];
-      let end = binData[i + 1];
-      let startTimestamp = new Date(start.timestamp);
-      let endTimestamp = new Date(end.timestamp);
 
-      let fillIncrease = end.level - start.level;
-      let timeDifferenceInHours =
-        (endTimestamp - startTimestamp) / (1000 * 60 * 60);
+function calculateFillRate(binsData) {
+  const fillRates = {};
 
-      totalFillIncrease += fillIncrease;
-      totalTimeInHours += timeDifferenceInHours;
+  // Sort the data by saved_time for each unique_id
+  binsData.sort((a, b) => new Date(a.saved_time) - new Date(b.saved_time));
+
+  // Object to store ongoing data for each unique_id
+  const ongoingData = {};
+
+  binsData.forEach(bin => {
+    if (!ongoingData[bin.unique_id]) {
+      // Initialize data for a unique_id
+      ongoingData[bin.unique_id] = {
+        lastLevel: bin.level_in_percents,
+        lastTime: new Date(bin.saved_time),
+        rateSum: 0,
+        timeSum: 0
+      };
+    } else {
+      const data = ongoingData[bin.unique_id];
+      const currentTime = new Date(bin.saved_time);
+      const deltaTime = (currentTime - data.lastTime) / 3600000; // Convert milliseconds to hours
+
+      if (bin.level_in_percents >= data.lastLevel) {
+        // Only calculate positive rates (ignoring negative rates which indicate a reset)
+        if (deltaTime > 0) {
+          const deltaLevel = bin.level_in_percents - data.lastLevel;
+          const rate = deltaLevel / deltaTime;
+
+          // Update ongoing sums
+          data.rateSum += rate * deltaTime;
+          data.timeSum += deltaTime;
+        }
+      } else {
+        // Detected a reset, possibly due to emptying, reset sums
+        data.rateSum = 0;
+        data.timeSum = 0;
+      }
+
+      // Update last known values
+      data.lastLevel = bin.level_in_percents;
+      data.lastTime = currentTime;
     }
+  });
 
-    let averageFillRate = totalFillIncrease / totalTimeInHours;
-    fillRates[binId] = averageFillRate.toFixed(2) + " units/hour";
-  }
+  // Calculate the average rate for each unique_id
+  Object.keys(ongoingData).forEach(id => {
+    const data = ongoingData[id];
+    if (data.timeSum > 0) {
+      fillRates[id] = data.rateSum / data.timeSum;
+    } else {
+      fillRates[id] = 0; // Default to 0 if no positive rate time was accumulated
+    }
+  });
 
+  //console.log("Fill Rates: ", fillRates);
   return fillRates;
 }
 
-export function checkForLowFillRates(fillRates) {
-  const binsToReturn = [];
-  for (let binId in fillRates) {
-    let fillRate = parseFloat(fillRates[binId]);
-    if (fillRate <= LOW_FILL_RATE_LIMIT) {
-      const lowFillRateDevice = mock_devices.find(
-        (device) => device.unique_id === parseInt(binId, 10)
-      );
+function estimateHoursUntilFull(binsData, fillRates) {
+  const hoursUntilFull = {};
+  
+  // Finding the latest data entry for each bin to determine its current fill level
+  const latestData = {};
 
-      if (lowFillRateDevice) {
-        binsToReturn.push(lowFillRateDevice);
-      }
+  binsData.forEach(bin => {
+    if (!latestData[bin.unique_id] || new Date(bin.saved_time) > new Date(latestData[bin.unique_id].saved_time)) {
+      latestData[bin.unique_id] = bin;  // Store the latest data for each unique_id
     }
-  }
-  return binsToReturn;
-}
+  });
 
-export function getLastPingTimes(binsData) {
-  let lastPingTimes = {};
+  // Calculate the number of hours until the bin is full for each bin
+  Object.keys(latestData).forEach(uniqueId => {
+    const latest = latestData[uniqueId];
+    const currentFillLevel = latest.level_in_percents;
+    const fillRate = fillRates[uniqueId];
 
-  for (let binId in binsData) {
-    const binData = binsData[binId];
-    const lastDataPoint = binData[binData.length - 1];
-    lastPingTimes[binId] = new Date(lastDataPoint?.timestamp);
-  }
-  return lastPingTimes;
-}
-
-export function hoursToFull(binsData, fillRates, currentFillLevels) {
-  let hoursToFullResults = {};
-
-  for (let binId in binsData) {
-    const fillRate = parseFloat(fillRates[binId].split(" ")[0]); // Extract fill rate
-    const currentFillLevel = currentFillLevels[binId];
-
-    if (fillRate <= 0) {
-      hoursToFullResults[binId] =
-        "Fill rate is zero or negative, cannot predict.";
-      continue;
-    }
-
-    const hoursToFull = (MAX_FILL_PERCENT - currentFillLevel) / fillRate;
-    if (hoursToFull < 0) {
-      hoursToFullResults[binId] =
-        "Bin is already above the fullness threshold.";
-      continue;
-    }
-
-    hoursToFullResults[binId] = hoursToFull; // Just return the hours to full
-  }
-
-  return hoursToFullResults;
-}
-
-export function predictTimestamp(binsData, hoursToFullResults) {
-  let predictions = {};
-  const lastPingTimes = getLastPingTimes(binsData); // Get the last ping times for all devices
-
-  for (let binId in binsData) {
-    const hoursToFull = hoursToFullResults[binId];
-    const latestPingTimestamp = new Date(lastPingTimes[binId]);
-    const predictionTime = new Date(
-      latestPingTimestamp.getTime() + hoursToFull * 3600 * 1000
-    ); // Add hoursToFull to the latest ping time
-    predictions[binId] = predictionTime.toISOString();
-  }
-  return predictions;
-}
-
-export function binsForPickup(predictions, THRESHOLD_IN_HOURS, mock_devices) {
-  const currentTime = new Date();
-  let binsToPickup = [];
-
-  for (let binId in predictions) {
-    const prediction = predictions[binId];
-
-    //console.log(`Prediction for bin ${binId}: ${prediction}`); // Debugging log
-
-    const predictedFullTime = new Date(prediction);
-    const adjust = predictedFullTime.getTimezoneOffset() / 60; //timezone adjustment dynamically. '/ 60' to convert minutes returned to hours
-    //console.log(predictedFullTime.getTimezoneOffset() / 60); // Debugging log
-    predictedFullTime.setHours(predictedFullTime.getHours() + adjust); // dumb af to have to do this. change if we switch to DB and doesn't need manual adjustment
-
-    const timeDiff = (predictedFullTime - currentTime) / (1000 * 60 * 60);
-    //console.log("predictedFullTime: ", predictedFullTime, "Current Time: ", currentTime); // Debugging log
-    //console.log(`Time diff for bin ${binId}: ${timeDiff}`); // Debugging log
-
-    if (timeDiff <= THRESHOLD_IN_HOURS) {
-      //console.log("DOING THIS: ", binId, ". Because: ", timeDiff, "less than or equal to: ", THRESHOLD_IN_HOURS); // Debugging log
-      const deviceToPickup = mock_devices.find(
-        (device) => device.unique_id === parseInt(binId, 10)
-      );
-
-      if (deviceToPickup) {
-        binsToPickup.push(deviceToPickup);
-      }
+    if (fillRate > 0) {  // Only calculate if the fill rate is positive
+      const remainingCapacity = MAX_FILL_PERCENT - currentFillLevel; // Remaining capacity until it reaches the threshold
+      const hours = remainingCapacity / fillRate;
+      hoursUntilFull[uniqueId] = hours;
     } else {
-      //console.log("**NOT DOING THIS: ", binId, ". Because: ", timeDiff, "is greater than: ", THRESHOLD_IN_HOURS); // Debugging log
+      hoursUntilFull[uniqueId] = Infinity; // If fill rate is 0 or negative, it will never fill (or data might be incorrect)
     }
-  }
+  });
 
-  return binsToPickup;
+  //console.log("Hours until full: ", hoursUntilFull);
+  return hoursUntilFull;
 }
 
-const exampleBinsData = generateDynamicBinsData();
-const fillRates = getFillRates(exampleBinsData);
-export const lowFillRateBins = checkForLowFillRates(fillRates);
-const lastPingTimes = getLastPingTimes(exampleBinsData);
-const numHours = hoursToFull(
-  exampleBinsData,
-  fillRates,
-  exampleCurrentFillLevels
-);
-const predictedTimes = predictTimestamp(exampleBinsData, numHours);
-export const predictedDevices = binsForPickup(
-  predictedTimes,
-  THRESHOLD_IN_HOURS,
-  mock_devices
-);
+function predictFullTime(binsData, hoursUntilFull) {
+    const predictedFullTimes = {};
 
-//console.log(exampleBinsData); // Debugging log
-//console.log("Fill Rates: ", fillRates); // Debugging log
-//console.log("Bins with low fill rates: ", lowFillRateBins); // Debugging log
-//console.log("Last Ping: ", lastPingTimes); // Debugging log
-//console.log("Hours until full: ", numHours); // Debugging log
-//console.log("Predicted Time for pick-up: ", predictedTimes); // Debugging log
-//console.log("These bins will be picked up: ", predictedDevices); // Debugging log
-//console.log("Low fill rate bins: ", lowFillRateBins);
+    // Finding the latest data entry for each bin to get the last saved_time
+    const latestData = {};
+
+    binsData.forEach(bin => {
+        if (!latestData[bin.unique_id] || new Date(bin.saved_time) > new Date(latestData[bin.unique_id].saved_time)) {
+            latestData[bin.unique_id] = bin;  // Store the latest data for each unique_id
+        }
+    });
+
+    // Calculate the predicted full timestamp for each bin
+    Object.keys(hoursUntilFull).forEach(uniqueId => {
+        const latest = latestData[uniqueId];
+        const hours = hoursUntilFull[uniqueId];
+        if (hours !== Infinity) {
+            const lastPingTime = new Date(latest.saved_time);
+            console.log(`Last Ping Time for Bin ${uniqueId}: ${lastPingTime.toISOString()} (UTC)`);
+            console.log(`Hours until full for Bin ${uniqueId}: ${hours}`);
+
+            // Calculate the number of milliseconds to add
+            const millisecondsToAdd = hours * 3600000;  // Convert hours to milliseconds
+            const fullTime = new Date(lastPingTime.getTime() + millisecondsToAdd);
+            console.log(`Predicted Full Time for Bin ${uniqueId}: ${fullTime.toISOString()} (UTC)`);
+
+            predictedFullTimes[uniqueId] = fullTime.toISOString();  // Convert to ISO string for consistency
+        } else {
+            predictedFullTimes[uniqueId] = "Never full under current conditions";
+        }
+    });
+
+    return predictedFullTimes;
+}
+
+
+
+function binsDueForPickup(predictedTimes, thresholdInHours = THRESHOLD_IN_HOURS) {
+  const binsForPickup = [];
+  const currentDateTime = new Date(); // Current time
+
+  Object.keys(predictedTimes).forEach(uniqueId => {
+    
+    let predictedTime = new Date(predictedTimes[uniqueId]);
+    const adjust = predictedTime.getTimezoneOffset() * 60 * 1000; // Convert minutes to milliseconds
+    predictedTime = new Date(predictedTime.getTime() + adjust); 
+    console.log("predicted TIME: ", predictedTime);
+    currentTime = new Date(currentDateTime.getTime());
+    const thresholdTime = new Date(currentTime.getTime() + thresholdInHours * 3600000); // Current time + threshold
+    console.log("CURRENT TIME: ", currentTime);
+    if (predictedTime <= thresholdTime) {
+      binsForPickup.push(uniqueId);
+    }
+  });
+
+  //console.log("Bins marked for pickup: ", binsForPickup);
+  return binsForPickup;
+}
+
+function findLowFillRateBins(fillRates) {
+  const lowFillRateBins = [];
+
+  // Iterate over the fill rates dictionary
+  Object.keys(fillRates).forEach(uniqueId => {
+      if (fillRates[uniqueId] < LOW_FILL_RATE_LIMIT) {
+          lowFillRateBins.push(uniqueId);
+      }
+  });
+
+  console.log("Bins with low fill rates: ", lowFillRateBins);
+  return lowFillRateBins;
+}
+
+
+
+
+const mock_bins_data = generateDynamicMockBins();
+const fillRates = calculateFillRate(mock_bins_data);
+const numHours = estimateHoursUntilFull(mock_bins_data, fillRates);
+const predictedTimes = predictFullTime(mock_bins_data, numHours);
+const binsToPickup = binsDueForPickup(predictedTimes);
+const lowFillRateBins = findLowFillRateBins(fillRates);
+
+//console.log("MOCK DATA: ", mock_bins_data);
+//console.log("Fill Rates: ", fillRates);
+//console.log("Num Hours: ",numHours);
+//console.log("Predicted pickup times for bins: ", predictedTimes);
+//console.log("Bins ready for pick up", binsToPickup);
+//console.log("Low Fill Rate Bins: ", lowFillRateBins);
