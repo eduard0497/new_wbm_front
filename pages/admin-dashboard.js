@@ -63,18 +63,12 @@ function AdminDashboard() {
     };
 
     const handleNewPing = (device) => {
-      console.log("New Socket Ping: ", device);
       let distanceInCM = device.level;
       let binHeight = device.bin_height;
       let trashHeight = binHeight - distanceInCM;
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
-      console.log("Devices Copy: ");
-      console.log(devicesCopy);
-      console.log("New Pinged Device Info: ");
-      console.log(device);
       const index = devicesCopy.findIndex((obj) => obj.id === device.id);
-      console.log("INDEX: ", index);
       devicesCopy[index] = device;
       setdevices(devicesCopy);
     };
