@@ -20,7 +20,6 @@ function AdminDashboard() {
   const [cardContainerStyle, setCardContainerStyle] = useState({
     display: "block",
   });
-  console.log("Devices: ", devices);
 
   useEffect(() => {
     setLoading(true);
@@ -70,10 +69,14 @@ function AdminDashboard() {
       let trashHeight = binHeight - distanceInCM;
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
+      console.log("Devices Copy: ");
+      console.log(devicesCopy);
+      console.log("New Pinged Device Info: ");
+      console.log(device);
       const index = devicesCopy.findIndex((obj) => obj.id === device.id);
       console.log("INDEX: ", index);
       devicesCopy[index] = device;
-      setdevices(devicesCopy);
+      // setdevices(devicesCopy);
     };
 
     socket.on("request_data", handleData);
