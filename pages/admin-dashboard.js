@@ -76,7 +76,7 @@ function AdminDashboard() {
       const index = devicesCopy.findIndex((obj) => obj.id === device.id);
       console.log("INDEX: ", index);
       devicesCopy[index] = device;
-      // setdevices(devicesCopy);
+      setdevices(devicesCopy);
     };
 
     socket.on("request_data", handleData);
