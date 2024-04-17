@@ -75,7 +75,8 @@ function generateDynamicMockBins() {
 
 
 
-function calculateFillRate(binsData) {
+export function calculateFillRate(binsData) {
+  //console.log("lets see bins to check inp: ", binsData);
   const fillRates = {};
 
   // Sort the data by saved_time for each unique_id
@@ -134,7 +135,7 @@ function calculateFillRate(binsData) {
   return fillRates;
 }
 
-function estimateHoursUntilFull(binsData, fillRates) {
+export function estimateHoursUntilFull(binsData, fillRates) {
   const hoursUntilFull = {};
   
   // Finding the latest data entry for each bin to determine its current fill level
@@ -165,7 +166,7 @@ function estimateHoursUntilFull(binsData, fillRates) {
   return hoursUntilFull;
 }
 
-function predictFullTime(binsData, hoursUntilFull) {
+export function predictFullTime(binsData, hoursUntilFull) {
     const predictedFullTimes = {};
 
     // Finding the latest data entry for each bin to get the last saved_time
@@ -183,13 +184,13 @@ function predictFullTime(binsData, hoursUntilFull) {
         const hours = hoursUntilFull[uniqueId];
         if (hours !== Infinity) {
             const lastPingTime = new Date(latest.saved_time);
-            console.log(`Last Ping Time for Bin ${uniqueId}: ${lastPingTime.toISOString()} (UTC)`);
-            console.log(`Hours until full for Bin ${uniqueId}: ${hours}`);
+            // console.log(`Last Ping Time for Bin ${uniqueId}: ${lastPingTime.toISOString()} (UTC)`);
+            // console.log(`Hours until full for Bin ${uniqueId}: ${hours}`);
 
             // Calculate the number of milliseconds to add
             const millisecondsToAdd = hours * 3600000;  // Convert hours to milliseconds
             const fullTime = new Date(lastPingTime.getTime() + millisecondsToAdd);
-            console.log(`Predicted Full Time for Bin ${uniqueId}: ${fullTime.toISOString()} (UTC)`);
+            // console.log(`Predicted Full Time for Bin ${uniqueId}: ${fullTime.toISOString()} (UTC)`);
 
             predictedFullTimes[uniqueId] = fullTime.toISOString();  // Convert to ISO string for consistency
         } else {
@@ -202,19 +203,20 @@ function predictFullTime(binsData, hoursUntilFull) {
 
 
 
-function binsDueForPickup(predictedTimes, thresholdInHours = THRESHOLD_IN_HOURS) {
+export function binsDueForPickup(predictedTimes, thresholdInHours = THRESHOLD_IN_HOURS) {
   const binsForPickup = [];
   const currentDateTime = new Date(); // Current time
+  let currentTime;
 
   Object.keys(predictedTimes).forEach(uniqueId => {
     
     let predictedTime = new Date(predictedTimes[uniqueId]);
     const adjust = predictedTime.getTimezoneOffset() * 60 * 1000; // Convert minutes to milliseconds
     predictedTime = new Date(predictedTime.getTime() + adjust); 
-    console.log("predicted TIME: ", predictedTime);
+    // console.log("predicted TIME: ", predictedTime);
     currentTime = new Date(currentDateTime.getTime());
     const thresholdTime = new Date(currentTime.getTime() + thresholdInHours * 3600000); // Current time + threshold
-    console.log("CURRENT TIME: ", currentTime);
+    // console.log("CURRENT TIME: ", currentTime);
     if (predictedTime <= thresholdTime) {
       binsForPickup.push(uniqueId);
     }
@@ -224,7 +226,7 @@ function binsDueForPickup(predictedTimes, thresholdInHours = THRESHOLD_IN_HOURS)
   return binsForPickup;
 }
 
-function findLowFillRateBins(fillRates) {
+export function findLowFillRateBins(fillRates) {
   const lowFillRateBins = [];
 
   // Iterate over the fill rates dictionary
@@ -234,19 +236,19 @@ function findLowFillRateBins(fillRates) {
       }
   });
 
-  console.log("Bins with low fill rates: ", lowFillRateBins);
+  // console.log("Bins with low fill rates: ", lowFillRateBins);
   return lowFillRateBins;
 }
 
 
 
 
-const mock_bins_data = generateDynamicMockBins();
-const fillRates = calculateFillRate(mock_bins_data);
-const numHours = estimateHoursUntilFull(mock_bins_data, fillRates);
-const predictedTimes = predictFullTime(mock_bins_data, numHours);
-const binsToPickup = binsDueForPickup(predictedTimes);
-const lowFillRateBins = findLowFillRateBins(fillRates);
+//const mock_bins_data = generateDynamicMockBins();
+//const fillRates = calculateFillRate(mock_bins_data);
+//const numHours = estimateHoursUntilFull(mock_bins_data, fillRates);
+//const predictedTimes = predictFullTime(mock_bins_data, numHours);
+//const binsToPickup = binsDueForPickup(predictedTimes);
+//const lowFillRateBins = findLowFillRateBins(fillRates);
 
 //console.log("MOCK DATA: ", mock_bins_data);
 //console.log("Fill Rates: ", fillRates);
