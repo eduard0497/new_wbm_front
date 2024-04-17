@@ -54,6 +54,12 @@ function Data() {
     getHistorical();
   }, []);
 
+  const resetDates = () => {
+    setStartDate("")
+    setEndDate("")
+    getHistorical()
+  }
+
   //
   //
   //
@@ -168,6 +174,7 @@ function Data() {
           onChange={(e) => setEndDate(e.target.value)}
         />
         <button onClick={getHistorical}>Display</button>
+        <button onClick={resetDates}>Reset</button>
       </div>
 
       {/*  */}
@@ -241,7 +248,7 @@ const LineChartComponent = ({ data }) => {
       label: `unique_id ${uniqueId}`,
       data: dataPoints,
       fill: false,
-      borderColor: "#" + Math.floor(Math.random() * 16777215).toString(16), // Random color
+      // borderColor: "#" + Math.floor(Math.random() * 16777215).toString(16), // Random color
     };
   });
 
