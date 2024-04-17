@@ -86,7 +86,7 @@ function AdminDashboard() {
       socket.off("request_data", handleData);
       socket.off("new_ping", handleNewPing);
     };
-  }, [socket]);
+  }, [socket, devices]);
 
   useEffect(() => {
     if (currentScreen === "") {
