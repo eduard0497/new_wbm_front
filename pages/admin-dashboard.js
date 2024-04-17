@@ -71,6 +71,7 @@ function AdminDashboard() {
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
       const index = devicesCopy.findIndex((obj) => obj["id"] === device["id"]);
+      console.log(index);
       devicesCopy[index] = device;
       setdevices(devicesCopy);
     };
