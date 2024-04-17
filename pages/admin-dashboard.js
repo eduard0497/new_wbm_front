@@ -20,6 +20,7 @@ function AdminDashboard() {
   const [cardContainerStyle, setCardContainerStyle] = useState({
     display: "block",
   });
+  console.log("Devices: ", devices);
 
   useEffect(() => {
     setLoading(true);
@@ -63,6 +64,7 @@ function AdminDashboard() {
     };
 
     const handleNewPing = (device) => {
+      console.log("New Socket Ping: ", device);
       let distanceInCM = device.level;
       let binHeight = device.bin_height;
       let trashHeight = binHeight - distanceInCM;
