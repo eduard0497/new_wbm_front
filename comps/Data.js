@@ -45,6 +45,7 @@ function Data() {
         if (!data.status) {
           console.log(data.msg);
         } else {
+          console.log(data.historicalData);
           setallHistorical(data.historicalData);
         }
       });
@@ -55,10 +56,10 @@ function Data() {
   }, []);
 
   const resetDates = () => {
-    setStartDate("")
-    setEndDate("")
-    getHistorical()
-  }
+    setStartDate("");
+    setEndDate("");
+    getHistorical();
+  };
 
   //
   //
