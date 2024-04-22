@@ -45,7 +45,7 @@ function Data() {
         if (!data.status) {
           console.log(data.msg);
         } else {
-          console.log(data.historicalData);
+          console.log(data.notManipulated);
           setallHistorical(data.historicalData);
         }
       });
