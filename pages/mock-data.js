@@ -39,6 +39,7 @@ function MockData() {
           <RowToAddDevice getDevices={getDevices} />
         </tbody>
       </table>
+      <Talking />
     </div>
   );
 }
@@ -316,5 +317,40 @@ const RowToAddDevice = ({ getDevices }) => {
         <button onClick={addDevice}>ADD DEVICE</button>
       </td>
     </tr>
+  );
+};
+
+const Talking = () => {
+  const talkToGateway = () => {
+    fetch(
+      "https://4a70-130-166-192-29.ngrok-free.app/api/devices/ac0232e121dbde45/queue",
+      {
+        method: "POST",
+        headers: {
+          "Grpc-Metadata-Authorization":
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6IjgyMDhhN2EyLTlkMWQtNDY0Zi05ZTQzLTU3ZDJjYzk2NjNlYSIsInR5cCI6ImtleSJ9.9Wgdd54pQOeQbPAQO3AnQgyzLTkNAqQn1c5vQqa7NpM",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          queueItem: {
+            confirmed: false,
+            data: "Ag==",
+            fCntDown: 0,
+            fPort: 1,
+            id: "string",
+            isPending: true,
+          },
+        }),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.error("Error:", error));
+  };
+
+  return (
+    <div>
+      <button onClick={talkToGateway}>Talk to the gateway</button>
+    </div>
   );
 };
