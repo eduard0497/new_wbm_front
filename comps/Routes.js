@@ -136,6 +136,7 @@ function Routes() {
 
   useEffect(() => {
     const filterDevices = () => {
+
       const filtered = devices.filter((device) => {
         const needsBatteryChange = device.battery < 25;
         const needsEmptying = device.level >= 80;
@@ -143,7 +144,7 @@ function Routes() {
 
         return (
           (filters.changeBattery && needsBatteryChange) ||
-          (filters.emptyBin && needsEmptying) || isPredicted
+          (filters.emptyBin && (needsEmptying || isPredicted))
         );
       });
       setDevicesToWorkOn(filtered);
