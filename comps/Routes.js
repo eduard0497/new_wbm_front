@@ -12,62 +12,32 @@ import {
 
 function Routes() {
   const [devices, setDevices] = useState([]);
-  const [historical, setHistorical] = useState([])
-
-  //
-  const getCurrentLevels = (devices) => {
-    let tempObject = {};
-    devices.map((device) => {
-      tempObject[device.unique_id] = device.level;
-    });
-    return tempObject;
-  };
-
+  const [predictedDevices, setPredictedDevices] = useState([]);
+  const [newPredicted, setNewPredicted] = useState([]);
+  const [historical, setHistorical] = useState([]);
+  const [allDevices, setAllDevices] = useState([]);
+  const [travelMode, setTravelMode] = useState("WALKING");
+  const [estimatedTime, setEstimatedTime] = useState("");
+  const [directions, setDirections] = useState(null);
+  const [devicesToWorkOn, setDevicesToWorkOn] = useState(devices);
+  const [allRoutes, setAllRoutes] = useState([]);
   let fillRates;
   let numHours;
   let predictedTimes;
-  let predictedDevices;
   let lowFillRateBins;
-  if(historical.length > 0) {
-   // console.log("Historical data: ", historical);
-    fillRates = calculateFillRate(historical);
-   // console.log("Fill rates: ", fillRates);
-    numHours = estimateHoursUntilFull(historical, fillRates);
-    //console.log("Num hours: ", numHours);
-    predictedTimes = predictFullTime(historical, numHours);
-    //console.log("Predicted tiemstamp: ", predictedTimes);
-    predictedDevices = binsDueForPickup(predictedTimes, 6);
-    console.log("Predicted bins: ", predictedDevices);
-    
-    lowFillRateBins = findLowFillRateBins(fillRates);
-    //console.log("Low fill rate: ", lowFillRateBins);
-    
-  }
 
-  // lowFillRateBins = checkForLowFillRates(fillRates);
-  // lastPingTimes = getLastPingTimes(allDevices);
-  // currentFillLevels = getCurrentLevels(allDevices);
-  // numHours = hoursToFull(allDevices, fillRates, currentFillLevels);
-  // predictedTimes = predictTimestamp(allDevices, numHours);
-  // predictedDevices = binsForPickup(predictedTimes, 6, allDevices);
+  useEffect(() => {
+    if (predictedDevices.length > 0 && allDevices.length > 0) {
+      const updatedDevices = allDevices.filter(device =>
+        predictedDevices.includes(device.unique_id)
+      );
+      setNewPredicted(updatedDevices);  // Thsis will update the map display
+    }
+  }, [predictedDevices, allDevices]);
 
-  //merge predicted bins
-  // const mergeAndSetDevices = (filteredDevices) => {
-  //   // Create a Set of unique_id values from filteredDevices for fast lookup
-  //   const filteredIds = new Set(
-  //     filteredDevices.map((device) => device.unique_id)
-  //   );
 
-  //   // Filter out predictedDevices that are already in filteredDevices by unique_id
-  //   const uniquePredictedDevices = predictedDevices.filter(
-  //     (device) => !filteredIds.has(device.unique_id)
-  //   );
 
-  //   // Combine filteredDevices with the unique predictedDevices
-  //   const combinedDevices = [...filteredDevices, ...uniquePredictedDevices];
 
-  //   setDevices(combinedDevices);
-  // };
 
   const getDevices = () => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
@@ -80,14 +50,16 @@ function Routes() {
         if (!data.status) {
           console.log(data.msg);
         } else {
-          const allDevices = helperToConvertLevelToPercentage(data.devices);
-          const filteredDevices = pickDevicesWithIssues(allDevices);
+          let tmpAll = helperToConvertLevelToPercentage(data.devices);
+          setAllDevices(tmpAll);
+          const filteredDevices = pickDevicesWithIssues(tmpAll);
           setDevices(filteredDevices);
-          // mergeAndSetDevices(filteredDevices); //added for predicted bins
         }
       })
       .catch((e) => console.log(e));
   };
+
+
 
   const getDevicesHistorical = () => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-historical-for-routes`, {
@@ -106,6 +78,41 @@ function Routes() {
       .catch((e) => console.log(e));
   };
 
+
+  useEffect(() => {
+    if(historical.length > 0) {
+      // console.log("Historical data: ", historical);
+       fillRates = calculateFillRate(historical);
+      // console.log("Fill rates: ", fillRates);
+       numHours = estimateHoursUntilFull(historical, fillRates);
+       //console.log("Num hours: ", numHours);
+       predictedTimes = predictFullTime(historical, numHours);
+       //console.log("Predicted tiemstamp: ", predictedTimes);
+       let tmpArray = binsDueForPickup(predictedTimes, 6);
+       setPredictedDevices(tmpArray);
+       
+       lowFillRateBins = findLowFillRateBins(fillRates);
+       //console.log("Low fill rate: ", lowFillRateBins);
+       
+     }
+  }, [historical])
+
+
+  const mergeAndSetDevices = (filteredDevices) => {
+    const filteredIds = new Set(filteredDevices.map((device) => device.unique_id));
+    const uniquePredictedDevices = newPredicted.filter(device => !filteredIds.has(device.unique_id));
+    const combinedDevices = [...filteredDevices, ...uniquePredictedDevices];
+    setDevices(combinedDevices);
+  }
+
+  useEffect(() => {
+    // Ensure both newPredicted and allDevices are not empty
+    if (newPredicted.length > 0 && allDevices.length > 0) {
+      const filteredDevices = pickDevicesWithIssues(allDevices);
+      mergeAndSetDevices(filteredDevices);
+    }
+  }, [newPredicted, allDevices]); 
+
   useEffect(() => {
     getDevices();
     getDevicesHistorical();
@@ -117,28 +124,26 @@ function Routes() {
   });
 
   const handleFilterChange = (e) => {
-    const { name, value, checked, type } = e.target;
-    setFilters((prevFilters) => ({
+    const { name, checked, type } = e.target;
+    console.log(`Filter changed: ${name}, Checked: ${checked}`);
+    setFilters(prevFilters => ({
       ...prevFilters,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : e.target.value,
     }));
   };
+  
 
-  const [travelMode, setTravelMode] = useState("WALKING");
-  const [estimatedTime, setEstimatedTime] = useState("");
-  const [directions, setDirections] = useState(null);
-  const [devicesToWorkOn, setDevicesToWorkOn] = useState(devices);
 
   useEffect(() => {
     const filterDevices = () => {
       const filtered = devices.filter((device) => {
         const needsBatteryChange = device.battery < 25;
         const needsEmptying = device.level >= 80;
+        const isPredicted = predictedDevices.includes(device.unique_id);
 
         return (
           (filters.changeBattery && needsBatteryChange) ||
-          (filters.emptyBin && needsEmptying) ||
-          predictedDeviceIds.has(device.unique_id)
+          (filters.emptyBin && needsEmptying) || isPredicted
         );
       });
       setDevicesToWorkOn(filtered);
@@ -269,7 +274,7 @@ function Routes() {
       });
   };
 
-  const [allRoutes, setAllRoutes] = useState([]);
+
 
   const getRoutes = () => {
     fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-routes`, {
@@ -401,7 +406,7 @@ function Routes() {
 
         <div className={styles.contentContainer}>
           <MapView
-            devices={devicesToWorkOn}
+            devices={devices}
             mapWidth="600px"
             mapHeight="400px"
             directions={directions}

@@ -218,7 +218,7 @@ export function binsDueForPickup(predictedTimes, thresholdInHours = THRESHOLD_IN
     const thresholdTime = new Date(currentTime.getTime() + thresholdInHours * 3600000); // Current time + threshold
     // console.log("CURRENT TIME: ", currentTime);
     if (predictedTime <= thresholdTime) {
-      binsForPickup.push(uniqueId);
+      binsForPickup.push(parseInt(uniqueId, 10));
     }
   });
 
