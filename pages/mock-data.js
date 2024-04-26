@@ -323,7 +323,7 @@ const RowToAddDevice = ({ getDevices }) => {
 const Talking = () => {
   const talkToGateway = () => {
     fetch(
-      "https://4a70-130-166-192-29.ngrok-free.app/api/devices/ac0232e121dbde45/queue",
+      "https://0eed-130-166-192-29.ngrok-free.app/api/devices/ac0232e121dbde45/queue",
       {
         method: "POST",
         headers: {
@@ -344,8 +344,9 @@ const Talking = () => {
       }
     )
       .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error:", error));
+      .then((data) => {
+        console.log(data);
+      });
   };
 
   return (

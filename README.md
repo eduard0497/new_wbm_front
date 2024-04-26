@@ -1,34 +1,42 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+**Documentation for the front end**
 
-## Getting Started
+Tech Stack:
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
+```
+Next.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+_[Node](https://nodejs.org/en/download) has to be installed on the machine!!!_
+To make sure it is installed, run both commands one after another:
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```
+node -v
+npm -v
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+Both need to show their installed versions to make sure they are working properly
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+1. Clone GitHub [repo](https://github.com/eduard0497/new_wbm_front.git)
+2. Open terminal (or GitBash) in the folder directory
+3. Run command:
 
-## Learn More
+```
+npm i
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Create a file called _.env_ in root directory of the folder
+5. Add following environmental variables to that file:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+NEXT_PUBLIC_GOOGLE_MAP_API_KEY={Obtain API key from Google Map Javascript SDK}
+NEXT_PUBLIC_SERVER_LINK="http://localhost:3000"
+NEXT_PUBLIC_KEY_TO_ADD_ADMIN={random string}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+6. Start up the front end by running the following command:
 
-## Deploy on Vercel
+```
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+If no errors occured, the front end should start automatically at link **_http://localhost:3001/_**
