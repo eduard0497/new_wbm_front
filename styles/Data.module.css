@@ -99,3 +99,14 @@
 
   color: black;
 }
+
+.red_button {
+  padding: 10px 15px;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #ffffff;
+  background-color: #ff1414;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}

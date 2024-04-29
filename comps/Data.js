@@ -5,48 +5,46 @@ import styles from "../styles/Data.module.css";
 
 function Data() {
   const colors = [
-    "rgba(255, 99, 132, 0.5)",  // red
-    "rgba(54, 162, 235, 0.5)",  // blue
-    "rgba(255, 206, 86, 0.5)",  // yellow
-    "rgba(75, 192, 192, 0.5)",  // green
+    "rgba(255, 99, 132, 0.5)", // red
+    "rgba(54, 162, 235, 0.5)", // blue
+    "rgba(255, 206, 86, 0.5)", // yellow
+    "rgba(75, 192, 192, 0.5)", // green
     "rgba(153, 102, 255, 0.5)", // purple
-    "rgba(255, 159, 64, 0.5)"   // orange
+    "rgba(255, 159, 64, 0.5)", // orange
   ];
   const chartOptions = {
     scales: { y: { beginAtZero: true } },
     animation: {
-      duration: 5// general animation time
+      duration: 5, // general animation time
     },
     hover: {
-      animationDuration: 5// duration of animations when hovering an item
+      animationDuration: 5, // duration of animations when hovering an item
     },
-    responsiveAnimationDuration: 0 // animation duration after a resize
+    responsiveAnimationDuration: 0, // animation duration after a resize
   };
   const [mockData, setHistorical] = useState([]);
-  const [activeTab, setActiveTab] = useState('fillLevels');
+  const [activeTab, setActiveTab] = useState("fillLevels");
+
+  const getHistorical = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-historical-for-routes`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          setHistorical(data.data);
+        } else {
+          console.log(data.msg);
+        }
+      })
+      .catch((e) => console.log(e));
+  };
 
   useEffect(() => {
-    const getHistorical = () => {
-      fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-historical-for-routes`, {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status) {
-            setHistorical(data.data);
-          } else {
-            console.log(data.msg);
-          }
-        })
-        .catch(e => console.log(e));
-    };
-
     getHistorical();
   }, []);
-
- 
 
   // function generateDynamicMockBins() {
   //   const currentDateTime = new Date();
@@ -58,7 +56,7 @@ function Data() {
   //       { uniqueId: 58, fillRate: 9, startLevel: 10, hours: 6 },
   //       { uniqueId: 59, fillRate: 0.1, startLevel: 6, hours: 6 },
   //   ];
-  
+
   //   binSpecifications.forEach(spec => {
   //       for (let i = 0; i <= spec.hours; i++) {
   //           let date = new Date(startDateTime.getTime() + i * 3600000);
@@ -83,26 +81,28 @@ function Data() {
       acc[item.unique_id].push(item);
       return acc;
     }, {});
-  
+
     // Create datasets for each unique device using a predefined color set
     const datasets = Object.keys(groupedByDevice).map((unique_id, index) => {
       const data = groupedByDevice[unique_id];
       const colorIndex = index % colors.length; // Cycle through colors if more devices than colors
       return {
         label: `Device ${unique_id}`,
-        data: data.map(item => item.level_in_percents),
+        data: data.map((item) => item.level_in_percents),
         borderColor: colors[colorIndex],
         backgroundColor: colors[colorIndex],
         fill: false,
-        lineTension: 0.1
+        lineTension: 0.1,
       };
     });
-  
+
     setFillLevelsOverTime({
-      labels: mockData.map(data => new Date(data.saved_time).toLocaleString()),
-      datasets
+      labels: mockData.map((data) =>
+        new Date(data.saved_time).toLocaleString()
+      ),
+      datasets,
     });
-  
+
     // Update other charts as necessary
     const frequencyData = calculateFillEvents(mockData);
     setMostFrequentlyFilledBins({
@@ -113,15 +113,15 @@ function Data() {
           data: Object.values(frequencyData),
           backgroundColor: "rgba(255, 205, 86, 0.2)",
           borderColor: "rgba(255, 205, 86, 1)",
-        }
+        },
       ],
     });
-  
+
     const pingCounts = mockData.reduce((acc, data) => {
       acc[data.unique_id] = (acc[data.unique_id] || 0) + 1;
       return acc;
     }, {});
-  
+
     setPingsPerDevice({
       labels: Object.keys(pingCounts),
       datasets: [
@@ -130,11 +130,10 @@ function Data() {
           data: Object.values(pingCounts),
           backgroundColor: "rgba(132, 99, 255, 0.2)",
           borderColor: "rgba(132, 99, 255, 1)",
-        }
+        },
       ],
     });
   };
-  
 
   const calculateFillEvents = (data) => {
     const events = {};
@@ -151,43 +150,67 @@ function Data() {
 
   const [fillLevelsOverTime, setFillLevelsOverTime] = useState({
     labels: [],
-    datasets: []
+    datasets: [],
   });
 
   const [mostFrequentlyFilledBins, setMostFrequentlyFilledBins] = useState({
     labels: [],
-    datasets: []
+    datasets: [],
   });
 
   const [pingsPerDevice, setPingsPerDevice] = useState({
     labels: [],
-    datasets: []
+    datasets: [],
   });
+
+  const clearHistorical = () => {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/clear-all-historical`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.status) {
+          alert(data.msg);
+        } else {
+          getHistorical();
+        }
+      });
+  };
 
   return (
     <div className={styles.analytics_container}>
       <div className={styles.date_range_selector}>
-        <button onClick={() => setActiveTab('fillLevels')}>Fill Levels Over Time</button>
-        <button onClick={() => setActiveTab('frequentFills')}>Most Frequently Filled Bins</button>
-        <button onClick={() => setActiveTab('pings')}>Number of Pings per Device</button>
+        <button onClick={() => setActiveTab("fillLevels")}>
+          Fill Levels Over Time
+        </button>
+        <button onClick={() => setActiveTab("frequentFills")}>
+          Most Frequently Filled Bins
+        </button>
+        <button onClick={() => setActiveTab("pings")}>
+          Number of Pings per Device
+        </button>
       </div>
-  
+      <button className={styles.red_button} onClick={clearHistorical}>
+        Clear Historical Data
+      </button>
       <div className={styles.chart_container}>
-        {activeTab === 'fillLevels' && (
+        {activeTab === "fillLevels" && (
           <div className={styles.chart}>
             <h2>Average Fill Levels Over Time</h2>
             <Line data={fillLevelsOverTime} options={chartOptions} />
           </div>
         )}
-  
-        {activeTab === 'frequentFills' && (
+
+        {activeTab === "frequentFills" && (
           <div className={styles.chart}>
             <h2>Most Frequently Filled Bins</h2>
             <Bar data={mostFrequentlyFilledBins} options={chartOptions} />
           </div>
         )}
-  
-        {activeTab === 'pings' && (
+
+        {activeTab === "pings" && (
           <div className={styles.chart}>
             <h2>Number of Pings per Device</h2>
             <Bar data={pingsPerDevice} options={chartOptions} />
