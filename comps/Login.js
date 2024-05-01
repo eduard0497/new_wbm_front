@@ -31,6 +31,7 @@ function Login() {
           setErrorMessage(data.msg);
         } else {
           await router.push("/admin-dashboard");
+          router.reload();
         }
       });
   };
