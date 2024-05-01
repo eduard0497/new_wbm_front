@@ -42,25 +42,49 @@ function AdminDashboard() {
         .catch((e) => console.log(e));
     };
 
+    const getDevicesInfo = () => {
+      fetch(`${process.env.NEXT_PUBLIC_SERVER_LINK}/get-devices`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          try {
+            let tmpDevices = data.devices.map((device) => {
+              let distanceInCM = device.level;
+              let binHeight = device.bin_height;
+              let trashHeight = binHeight - distanceInCM;
+              device.level = parseInt((trashHeight * 100) / binHeight);
+              return device;
+            });
+            setdevices(tmpDevices);
+          } catch (error) {
+            console.log(error);
+          }
+        });
+    };
+
     getUserInfo();
+    getDevicesInfo();
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    const handleData = (data) => {
-      try {
-        let tmpDevices = data.map((device) => {
-          let distanceInCM = device.level;
-          let binHeight = device.bin_height;
-          let trashHeight = binHeight - distanceInCM;
-          device.level = parseInt((trashHeight * 100) / binHeight);
-          return device;
-        });
-        setdevices(tmpDevices);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    // const handleData = (data) => {
+    //   try {
+    //     let tmpDevices = data.map((device) => {
+    //       let distanceInCM = device.level;
+    //       let binHeight = device.bin_height;
+    //       let trashHeight = binHeight - distanceInCM;
+    //       device.level = parseInt((trashHeight * 100) / binHeight);
+    //       return device;
+    //     });
+    //     setdevices(tmpDevices);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
 
     const handleNewPing = (device) => {
       let distanceInCM = device.level;
@@ -73,14 +97,14 @@ function AdminDashboard() {
       setdevices(devicesCopy);
     };
 
-    socket.on("request_data", handleData);
+    // socket.on("request_data", handleData);
     socket.on("new_ping", handleNewPing);
 
     return () => {
-      socket.off("request_data", handleData);
+      // socket.off("request_data", handleData);
       socket.off("new_ping", handleNewPing);
     };
-  }, [socket, devices]);
+  }, []);
 
   useEffect(() => {
     if (currentScreen === "") {
