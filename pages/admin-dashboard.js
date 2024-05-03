@@ -94,7 +94,9 @@ function AdminDashboard() {
       let trashHeight = binHeight - distanceInCM;
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
-      const index = devicesCopy.findIndex((obj) => obj.id === device.id);
+      const index = devicesCopy.findIndex(
+        (obj) => obj.unique_id === device.unique_id
+      );
       devicesCopy[index] = device;
       console.log("devices copy after new ping");
       console.log(devicesCopy);
