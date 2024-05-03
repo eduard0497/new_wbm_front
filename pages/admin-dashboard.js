@@ -96,10 +96,10 @@ function AdminDashboard() {
       let devicesCopy = [...devices];
       const index = devicesCopy.findIndex((obj) => obj.id === device.id);
       devicesCopy[index] = device;
+      console.log("devices copy after new ping");
+      console.log(devicesCopy);
       setdevices(devicesCopy);
     };
-
-    console.log(devicesCopy);
 
     // socket.on("request_data", handleData);
     socket.on("new_ping", handleNewPing);
