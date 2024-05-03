@@ -87,8 +87,6 @@ function AdminDashboard() {
     // };
 
     const handleNewPing = (device) => {
-      console.log("new ping");
-      console.log(device);
       let distanceInCM = device.level;
       let binHeight = device.bin_height;
       let trashHeight = binHeight - distanceInCM;
@@ -101,8 +99,6 @@ function AdminDashboard() {
         console.log("error index: " + index);
       } else {
         devicesCopy[index] = device;
-        console.log("devices copy after new ping");
-        console.log(devicesCopy);
         setdevices(devicesCopy);
       }
     };
@@ -112,9 +108,9 @@ function AdminDashboard() {
 
     return () => {
       // socket.off("request_data", handleData);
-      // socket.off("new_ping", handleNewPing);
+      socket.off("new_ping", handleNewPing);
     };
-  }, []);
+  }, [socket, devices]);
 
   console.log(devices);
 
