@@ -95,12 +95,16 @@ function AdminDashboard() {
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
       const index = devicesCopy.findIndex(
-        (obj) => obj.unique_id === device.unique_id
+        (obj) => obj.unique_id == device.unique_id
       );
-      devicesCopy[index] = device;
-      console.log("devices copy after new ping");
-      console.log(devicesCopy);
-      setdevices(devicesCopy);
+      if (index < 0) {
+        console.log("error index: " + index);
+      } else {
+        devicesCopy[index] = device;
+        console.log("devices copy after new ping");
+        console.log(devicesCopy);
+        setdevices(devicesCopy);
+      }
     };
 
     // socket.on("request_data", handleData);
