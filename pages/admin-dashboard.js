@@ -87,6 +87,8 @@ function AdminDashboard() {
     // };
 
     const handleNewPing = (device) => {
+      console.log("new ping");
+      console.log(device);
       let distanceInCM = device.level;
       let binHeight = device.bin_height;
       let trashHeight = binHeight - distanceInCM;
@@ -97,14 +99,18 @@ function AdminDashboard() {
       setdevices(devicesCopy);
     };
 
+    console.log(devicesCopy);
+
     // socket.on("request_data", handleData);
     socket.on("new_ping", handleNewPing);
 
     return () => {
       // socket.off("request_data", handleData);
-      socket.off("new_ping", handleNewPing);
+      // socket.off("new_ping", handleNewPing);
     };
   }, []);
+
+  console.log(devices);
 
   useEffect(() => {
     if (currentScreen === "") {
