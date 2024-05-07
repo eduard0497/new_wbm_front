@@ -25,6 +25,8 @@ function Routes() {
   let numHours;
   let predictedTimes;
   let lowFillRateBins;
+  console.log(devicesToWorkOn);
+  console.log(directions);
 
   useEffect(() => {
     if (predictedDevices.length > 0 && allDevices.length > 0) {
@@ -152,55 +154,48 @@ function Routes() {
     filterDevices();
   }, [filters, devices]);
 
-  const fetchDirections = () => {
-    if (devicesToWorkOn.length < 2) {
+
+  useEffect(() => {
+    // Only fetch directions if there are sufficient devices and API is loaded
+    if (devicesToWorkOn.length >= 2 &&
+        typeof window.google !== "undefined" &&
+        typeof window.google.maps !== "undefined") {
+      fetchDirections();
+    } else {
+      console.log("Insufficient devices or Google Maps API not loaded.");
       setDirections(null);
       setEstimatedTime("");
-      return;
     }
+  }, [devicesToWorkOn, travelMode]);
 
-    const waypoints = devicesToWorkOn.slice(1, -1).map((bin) => ({
+  const fetchDirections = () => {
+    console.log("Fetching directions for devices to work on.");
+    const waypoints = devicesToWorkOn.slice(1, -1).map(bin => ({
       location: { lat: bin.lat, lng: bin.lng },
       stopover: true,
     }));
-
+  
     const directionsService = new window.google.maps.DirectionsService();
-    directionsService.route(
-      {
-        origin: { lat: devicesToWorkOn[0].lat, lng: devicesToWorkOn[0].lng },
-        destination: {
-          lat: devicesToWorkOn[devicesToWorkOn.length - 1].lat,
-          lng: devicesToWorkOn[devicesToWorkOn.length - 1].lng,
-        },
-        waypoints: waypoints,
-        travelMode: travelMode,
+    directionsService.route({
+      origin: { lat: devicesToWorkOn[0].lat, lng: devicesToWorkOn[0].lng },
+      destination: {
+        lat: devicesToWorkOn[devicesToWorkOn.length - 1].lat,
+        lng: devicesToWorkOn[devicesToWorkOn.length - 1].lng,
       },
-      (result, status) => {
-        if (status === window.google.maps.DirectionsStatus.OK) {
-          setDirections(result);
-          const duration = result.routes[0].legs.reduce(
-            (total, leg) => total + leg.duration.value,
-            0
-          );
-          setEstimatedTime(`${Math.floor(duration / 60)} minutes`);
-        } else {
-          console.error(`Directions request failed due to ${status}`);
-        }
+      waypoints: waypoints,
+      travelMode: travelMode,
+    }, (result, status) => {
+      if (status === window.google.maps.DirectionsStatus.OK) {
+        setDirections(result);
+        const duration = result.routes[0].legs.reduce((total, leg) => total + leg.duration.value, 0);
+        setEstimatedTime(`${Math.floor(duration / 60)} minutes`);
+      } else {
+        console.error(`Directions request failed due to ${status}`);
       }
-    );
+    });
   };
 
-  useEffect(() => {
-    if (
-      typeof window.google === "undefined" ||
-      typeof window.google.maps === "undefined"
-    ) {
-      console.error("Google Maps API is not loaded yet.");
-      return;
-    } else {
-      fetchDirections();
-    }
-  }, [devicesToWorkOn, travelMode, filters]);
+
 
   const decideWorkToDo = (bin) => {
     let emptyBin = false;
@@ -251,6 +246,8 @@ function Routes() {
       );
     });
   };
+
+
 
   const createRoute = () => {
     if (!devicesToWorkOn.length) return;
@@ -362,7 +359,7 @@ function Routes() {
       <h1>Manage Routes</h1>
 
       <div className={styles.routeSection}>
-        <h2>Route #1</h2>
+        <h2>Route</h2>
         <div className={styles.filtersContainer}>
           <label>
             <input
@@ -407,7 +404,7 @@ function Routes() {
 
         <div className={styles.contentContainer}>
           <MapView
-            devices={devices}
+            devices={devicesToWorkOn}
             mapWidth="600px"
             mapHeight="400px"
             directions={directions}
@@ -415,7 +412,7 @@ function Routes() {
           <div className={styles.routeSummaryAndControls}>
             <div className={styles.routeSummary}>
               <h3>Route Summary</h3>
-              <p>Total Bins: {devices.length}</p>
+              <p>Total Bins: {devicesToWorkOn.length}</p>
               {renderWorkToDo()}
             </div>
           </div>
