@@ -92,9 +92,15 @@ function AdminDashboard() {
       let trashHeight = binHeight - distanceInCM;
       device.level = parseInt((trashHeight * 100) / binHeight);
       let devicesCopy = [...devices];
-      const index = devicesCopy.findIndex((obj) => obj.id === device.id);
-      devicesCopy[index] = device;
-      setdevices(devicesCopy);
+      const index = devicesCopy.findIndex(
+        (obj) => obj.unique_id == device.unique_id
+      );
+      if (index < 0) {
+        console.log("error index: " + index);
+      } else {
+        devicesCopy[index] = device;
+        setdevices(devicesCopy);
+      }
     };
 
     // socket.on("request_data", handleData);
@@ -104,7 +110,9 @@ function AdminDashboard() {
       // socket.off("request_data", handleData);
       socket.off("new_ping", handleNewPing);
     };
-  }, []);
+  }, [socket, devices]);
+
+  console.log(devices);
 
   useEffect(() => {
     if (currentScreen === "") {
