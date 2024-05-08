@@ -28,6 +28,8 @@ import 'chartjs-adapter-date-fns';
 import styles from "../styles/Data.module.css";
 import { jsPDF } from "jspdf";
 import JSZip from "jszip";
+import 'jspdf-autotable';
+
 
 function Data() {
   const colors = [
