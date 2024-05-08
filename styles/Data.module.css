@@ -55,7 +55,7 @@
 }
 
 .insights_container {
-  background-color: #f8f8f8;
+  background-color: #c0bcbc;
   border-radius: 10px;
   padding: 30px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
@@ -70,18 +70,64 @@
   margin-bottom: 15px;
 }
 
+.insights_table {
+  width: 100%;
+  border-collapse: collapse; /* Ensures that the borders between cells are merged */
+  margin-top: 10px;
+  font-size: 0.9rem; /* Adjust font size for table content */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Soft shadow for the whole table */
+}
+
+.insights_table th, .insights_table td {
+  border: 1px solid #dee2e6; /* Light grey border for each cell */
+  padding: 8px; /* Spacing within cells */
+  text-align: left; /* Align text to the left within cells */
+}
+
+.insights_table th {
+  background-color: #4a5568; /* Dark background for header */
+  color: #ffffff; /* White text for contrast */
+  font-weight: bold; /* Bold font for headers */
+}
+
+.insights_table tr:nth-child(odd) {
+  background-color: #f7fafc; /* Lighter background for odd rows */
+}
+
+.insights_table tr:nth-child(even) {
+  background-color: #edf2f7; /* Slightly darker background for even rows */
+}
+
 .insight {
-  background: white;
+  background: #e2e8f0; /* Clean white background */
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px; /* Add space between cards */
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.insight:hover {
+  transform: translateY(-2px); /* Subtle lift effect on hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .insight h3 {
-  color: #333;
-  margin-bottom: 15px;
+  font-size: 18px; /* Increased font size */
+  color: #333; /* Darker font for better readability */
+  background-color: #e2e8f0; /* Soft gray background */
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
+
+
+.insight h3 span {
+  float: right;
+  font-weight: bold;
+  color: #666; /* More subtle icon color */
+}
+
 
 .insight div {
   margin-bottom: 15px; /* Space between summary and suggestions */
@@ -109,4 +155,30 @@
   background-color: #ff1414;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
+}
+
+.downloadContainer {
+  display: flex;
+  justify-content: center; /* Centers horizontally in the flex container */
+  align-items: center; /* Centers vertically in the flex container */
+  padding: 20px; /* Adds some spacing around the button */
+  margin-top: 20px; /* Optional: Adds top margin for spacing from elements above */
+}
+
+.downloadButton {
+  background-color: #4a5568; /* Matching the table header color */
+  color: #ffffff; /* White text for contrast */
+  border: none;
+  border-radius: 5px;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.downloadButton:hover {
+  background-color: #373e47; /* Darker on hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Deeper shadow on hover */
 }
